@@ -82,6 +82,23 @@ input[type=file]{display:none}
 .export-note{font-size:10px;color:#8b949e;text-align:center;margin-top:6px}
 
 /* ============================================================
+   DESIGN RULES (150px DB spec)
+   ============================================================ */
+.design-rules{padding:14px 16px;border-bottom:1px solid #30363d}
+.design-rules-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.design-rules-header:hover{color:#e6edf3}
+.design-rules-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b949e;font-weight:600}
+.design-rules-toggle{font-size:12px;color:#6e7681;transition:transform 0.2s}
+.design-rules.open .design-rules-toggle{transform:rotate(90deg)}
+.design-rules-body{font-size:11px;color:#8b949e;line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid #21262d;display:none}
+.design-rules.open .design-rules-body{display:block}
+.design-rules-body p{margin:0 0 6px}
+.design-rules-body strong{color:#c9d1d9}
+.design-rules-body ul{margin:4px 0 0 14px;padding:0}
+.design-rules-body li{margin:2px 0}
+.spec-pill{display:inline-block;font-size:9px;background:#23863622;color:#3fb950;border:1px solid #23863644;padding:2px 6px;border-radius:4px;margin-left:6px;font-weight:600}
+
+/* ============================================================
    PREVIEW AREA
    ============================================================ */
 .preview-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0d1117}
@@ -179,8 +196,26 @@ input[type=file]{display:none}
         <div class="section-title">Template</div>
         <div class="template-grid" id="tplGrid"></div>
       </div>
+      <div class="section design-rules open" id="designRulesSection">
+        <div class="design-rules-header" id="designRulesToggle">
+          <span class="design-rules-title">Design rules <span class="spec-pill">150px DB spec</span></span>
+          <span class="design-rules-toggle">›</span>
+        </div>
+        <div class="design-rules-body">
+          <p><strong>Viewport:</strong> 150px height, 100% width, overflow hidden, position fixed.</p>
+          <p><strong>Z-index:</strong> Background (-100) → Content (0–10) → CTA (99).</p>
+          <p><strong>Asset guide:</strong></p>
+          <ul>
+            <li>Logo: 90–120px wide or 35–45px tall</li>
+            <li>Overline: 84–120px wide, above CTA</li>
+            <li>CTA: 25–30px height, bottom-right, always tapesh (pulse)</li>
+            <li>Products: 68–80px height; BG: 100–125px height</li>
+          </ul>
+          <p><strong>Rules:</strong> All layout position:fixed; CTA on top; RTL; click_url for redirect.</p>
+        </div>
+      </div>
       <div class="section">
-        <div class="section-title">Assets <span style="color:#8b949e;font-weight:400;text-transform:none;letter-spacing:0">— drag &amp; drop or click</span></div>
+        <div class="section-title">Assets <span style="color:#8b949e;font-weight:400;text-transform:none;letter-spacing:0">— drag &amp; drop · sizes per spec above</span></div>
         <div class="slots-grid" id="slotsGrid"></div>
       </div>
       <div class="section">
@@ -195,14 +230,14 @@ input[type=file]{display:none}
         </svg>
         Export ZIP
       </button>
-      <div class="export-note" id="exportNote">Fill in assets · click to export</div>
+      <div class="export-note" id="exportNote">Exports follow 150px DB spec · Fill assets then export</div>
     </div>
   </aside>
 
   <!-- PREVIEW -->
   <main class="preview-area">
     <div class="preview-header">
-      <div class="preview-title">Live Preview · 150px Sticky DB · Yektanet</div>
+      <div class="preview-title">Live Preview · 150px Sticky DB <span class="spec-pill">spec</span> · Yektanet</div>
       <div class="preview-actions">
         <button class="btn-sm" onclick="updatePreview()">↻ Refresh</button>
       </div>
@@ -364,6 +399,22 @@ document.addEventListener('DOMContentLoaded',()=>{fire_tag(ALL_EVENT_TYPES.DOM_C
 // CLICK URL SCRIPT — injected inline at bottom of every ad HTML
 // ================================================================
 const CLICK_SCRIPT = `(function(){function gp(n){n=n.replace(/[\\[]/,'\\\\[').replace(/[\\]]/,'\\\\]');var r=new RegExp('[\\\\?&]'+n+'=([^&#]*)');var x=r.exec(location.search);return x===null?'':decodeURIComponent(x[1].replace(/\\+/g,' '));}var cu=gp('click_url');if(cu){document.addEventListener('click',function(){window.open(cu,'_blank');});}})();`;
+
+// ================================================================
+// SLOT SPEC HINTS (150px DB spec — element roles & sizes)
+// ================================================================
+const SLOT_SPEC_HINTS = {
+  logo: 'Brand logo · 90–120px wide or 35–45px tall · right or left',
+  overline: 'Tagline/headline · 84–120px wide · above CTA · right',
+  cta: 'Main click target · 25–30px height · bottom-right · tapesh (pulse)',
+  bg: 'Background · 100–125px height · full or 70% width · z-index -100',
+  product1: 'Product hero · 68–80px height · left/center',
+  product2: 'Product 2 · same height band',
+  product3: 'Product 3 · same height band',
+  percent: 'Discount badge · ~80px height · above CTA',
+  main: 'Character/mascot · ~110px height · left edge',
+  stick: 'Pointer/wand · ~120px wide · wobbles on CTA appear',
+};
 
 // ================================================================
 // PLACEHOLDER — shown in preview for missing optional assets
@@ -1108,9 +1159,10 @@ function renderSlots() {
         : `<img class="slot-thumb" src="${asset.dataUrl}"/>`
       : `<div class="slot-ph">${slot.icon}</div>`;
 
+    var specHint = SLOT_SPEC_HINTS[slot.id] ? ' · ' + SLOT_SPEC_HINTS[slot.id] : '';
     const desc = asset
-      ? `<span class="slot-desc" title="${asset.name}">${asset.name}</span>`
-      : `<span class="slot-desc">${slot.desc || (slot.req ? '⚡ Required' : 'Optional')}</span>`;
+      ? `<span class="slot-desc" title="${asset.name}${specHint}">${asset.name}</span>`
+      : `<span class="slot-desc" title="${(slot.desc || (slot.req ? '⚡ Required' : 'Optional'))}${specHint}">${slot.desc || (slot.req ? '⚡ Required' : 'Optional')}</span>`;
 
     const clearBtn = asset
       ? `<button class="slot-clear" data-clear="${slot.id}" title="Remove">×</button>`
@@ -1524,6 +1576,13 @@ function init() {
   renderSettings();
   renderFileTree();
   document.getElementById('exportBtn').addEventListener('click', exportZip);
+  var designRulesSection = document.getElementById('designRulesSection');
+  var designRulesToggle = document.getElementById('designRulesToggle');
+  if (designRulesSection && designRulesToggle) {
+    designRulesToggle.addEventListener('click', function() {
+      designRulesSection.classList.toggle('open');
+    });
+  }
   schedulePreview();
 
   // Proxy scroll events into the ad iframe for Scroll Reactive template
