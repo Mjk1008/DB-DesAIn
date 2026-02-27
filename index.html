@@ -338,6 +338,16 @@ const S = {
     entranceStyle: 'slide-up', // slide-up | zoom-in | fade | tilt-3d
     loopDuration: 20,          // seconds before loop/reload
     attentionHooks: [],        // ['colorFlashes','shakeCta','parallax','scrollReactive']
+    // Layout fine‑tune (applies consistently across templates)
+    productScale: 1,
+    productOffsetX: 0,
+    productOffsetY: 0,
+    logoScale: 1,
+    logoOffsetX: 0,
+    logoOffsetY: 0,
+    ctaScale: 1,
+    ctaOffsetX: 0,
+    ctaOffsetY: 0,
   }
 };
 
@@ -394,16 +404,37 @@ const TEMPLATES = {
     extraSettings: ['interval'],
 
     generateCSS() {
-      return `*{padding:0;margin:0;box-sizing:border-box}
+      const c = (S && S.cfg) || {};
+      const ls = c.logoScale   || 1;
+      const lox = c.logoOffsetX || 0;
+      const loy = c.logoOffsetY || 0;
+      const cs = c.ctaScale    || 1;
+      const cox = c.ctaOffsetX || 0;
+      const coy = c.ctaOffsetY || 0;
+      const ps = c.productScale   || 1;
+      const pox = c.productOffsetX || 0;
+      const poy = c.productOffsetY || 0;
+      return `:root{
+  --logo-scale:${ls};
+  --logo-ox:${lox}px;
+  --logo-oy:${loy}px;
+  --cta-scale:${cs};
+  --cta-ox:${cox}px;
+  --cta-oy:${coy}px;
+  --prod-scale:${ps};
+  --prod-ox:${pox}px;
+  --prod-oy:${poy}px;
+}
+*{padding:0;margin:0;box-sizing:border-box}
 body{width:100%;height:150px;overflow:hidden;background:transparent;cursor:pointer}
 .bg{position:fixed;right:0;bottom:0;width:70%;height:120px;z-index:-100;object-fit:cover;border-top-left-radius:12px}
-.logo{position:fixed;right:calc(35% - 65px);z-index:10;bottom:-200px;width:130px;object-fit:contain}
+.logo{position:fixed;right:calc(35% - 65px);z-index:10;bottom:-200px;width:130px;object-fit:contain;transform-origin:center;transform:translate(var(--logo-ox),var(--logo-oy)) scale(var(--logo-scale))}
 .main{position:fixed;left:-15px;height:120px;bottom:-10px;object-fit:contain}
 .percent{position:fixed;right:calc(35% - 5px);height:80px;bottom:50px;object-fit:contain}
 .overline{position:fixed;right:18px;height:108px;bottom:5px;object-fit:contain}
-.cta{position:fixed;right:calc(35% + 50px);height:28px;z-index:99;bottom:18px;opacity:0;cursor:pointer;object-fit:contain}
+.cta{position:fixed;right:calc(35% + 50px);height:28px;z-index:99;bottom:18px;opacity:0;cursor:pointer;object-fit:contain;transform-origin:center;transform:translate(var(--cta-ox),var(--cta-oy)) scale(var(--cta-scale))}
 .stick{position:fixed;bottom:8px;left:45px;z-index:10;width:120px;transform-origin:bottom center;opacity:0;pointer-events:none;object-fit:contain}
-.product{position:fixed;left:35px;z-index:5;bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer}
+.product{position:fixed;left:calc(35px + var(--prod-ox));z-index:5;bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer;transform-origin:bottom center;transform:translateY(var(--prod-oy)) scale(var(--prod-scale))}
 .product1{height:70px}.product2{height:80px}.product3{height:80px}
 .tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
 @keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}
@@ -477,16 +508,37 @@ products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES
     extraSettings: [],
 
     generateCSS() {
-      return `*{padding:0;margin:0;box-sizing:border-box}
+      const c = (S && S.cfg) || {};
+      const ls = c.logoScale   || 1;
+      const lox = c.logoOffsetX || 0;
+      const loy = c.logoOffsetY || 0;
+      const cs = c.ctaScale    || 1;
+      const cox = c.ctaOffsetX || 0;
+      const coy = c.ctaOffsetY || 0;
+      const ps = c.productScale   || 1;
+      const pox = c.productOffsetX || 0;
+      const poy = c.productOffsetY || 0;
+      return `:root{
+  --logo-scale:${ls};
+  --logo-ox:${lox}px;
+  --logo-oy:${loy}px;
+  --cta-scale:${cs};
+  --cta-ox:${cox}px;
+  --cta-oy:${coy}px;
+  --prod-scale:${ps};
+  --prod-ox:${pox}px;
+  --prod-oy:${poy}px;
+}
+*{padding:0;margin:0;box-sizing:border-box}
 body{width:100%;height:150px;overflow:hidden;background:transparent}
 .intro{position:fixed;right:-650px;bottom:0;height:120px;z-index:99999;cursor:pointer}
 .intro img{height:100%;object-fit:contain}
 .bg{position:fixed;bottom:0;left:0;height:100px;width:100%;border-top-left-radius:15px;border-top-right-radius:15px;z-index:-999999;transform:scaleY(0);transform-origin:bottom center;object-fit:cover}
-.logo{width:100px;position:fixed;left:75%;transform:translateX(-50%);top:-100px;z-index:-1;object-fit:contain}
+.logo{width:100px;position:fixed;left:75%;top:-100px;z-index:-1;object-fit:contain;transform-origin:center;transform:translate(calc(-50% + var(--logo-ox)),var(--logo-oy)) scale(var(--logo-scale))}
 .overline{width:84px;position:fixed;right:5%;bottom:-45px;object-fit:contain}
-.cta{width:84px;position:fixed;right:5%;bottom:-70px;cursor:pointer;object-fit:contain}
+.cta{width:84px;position:fixed;right:5%;bottom:-70px;cursor:pointer;object-fit:contain;transform-origin:center;transform:translate(var(--cta-ox),var(--cta-oy)) scale(var(--cta-scale))}
 .percent{position:fixed;left:26%;transform:translateX(-50%);width:30%;top:-128px;object-fit:contain}
-.products{width:calc(100% - 200px);position:fixed;left:-100%;bottom:20px;object-fit:contain}
+.products{width:calc(100% - 200px);position:fixed;left:-100%;bottom:20px;object-fit:contain;transform-origin:bottom left;transform:translate(var(--prod-ox),var(--prod-oy)) scale(var(--prod-scale))}
 .star{opacity:0;position:fixed;font-size:14px;color:gold;z-index:999}
 .star1{right:2%;bottom:10px}.star2{right:8%;bottom:5px}
 .tapesh{animation:tapesh 0.75s infinite linear;transform-origin:center}
@@ -568,18 +620,39 @@ function final(){
     extraSettings: ['countdownDate'],
 
     generateCSS() {
-      return `*{padding:0;margin:0;box-sizing:border-box;font-family:sans-serif}
+      const c = (S && S.cfg) || {};
+      const ls = c.logoScale   || 1;
+      const lox = c.logoOffsetX || 0;
+      const loy = c.logoOffsetY || 0;
+      const cs = c.ctaScale    || 1;
+      const cox = c.ctaOffsetX || 0;
+      const coy = c.ctaOffsetY || 0;
+      const ps = c.productScale   || 1;
+      const pox = c.productOffsetX || 0;
+      const poy = c.productOffsetY || 0;
+      return `:root{
+  --logo-scale:${ls};
+  --logo-ox:${lox}px;
+  --logo-oy:${loy}px;
+  --cta-scale:${cs};
+  --cta-ox:${cox}px;
+  --cta-oy:${coy}px;
+  --prod-scale:${ps};
+  --prod-ox:${pox}px;
+  --prod-oy:${poy}px;
+}
+*{padding:0;margin:0;box-sizing:border-box;font-family:sans-serif}
 body{width:100%;height:150px;overflow:hidden;background:transparent}
 .bg{position:fixed;right:0;bottom:0;width:100%;height:130px;object-fit:cover;z-index:-100}
-.logo{position:fixed;right:4%;top:50%;transform:translateY(-50%);height:42px;object-fit:contain;z-index:10;cursor:pointer}
+.logo{position:fixed;right:4%;top:50%;height:42px;object-fit:contain;z-index:10;cursor:pointer;transform-origin:center;transform:translate(var(--logo-ox),calc(-50% + var(--logo-oy))) scale(var(--logo-scale))}
 .overline{position:fixed;right:4%;bottom:6px;height:18px;object-fit:contain}
-.cta{position:fixed;left:4%;bottom:8px;height:30px;animation:tapesh 1s infinite linear;cursor:pointer;object-fit:contain}
+.cta{position:fixed;left:4%;bottom:8px;height:30px;animation:tapesh 1s infinite linear;cursor:pointer;object-fit:contain;transform-origin:center;transform:translate(var(--cta-ox),var(--cta-oy)) scale(var(--cta-scale))}
 .countdown{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:4px;background:rgba(0,0,0,0.55);border-radius:10px;padding:5px 12px;direction:ltr;backdrop-filter:blur(4px)}
 .cu{display:flex;flex-direction:column;align-items:center;min-width:26px}
 .cn{font-size:20px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
 .cl{font-size:7px;color:#aaa;margin-top:1px}
 .cs{font-size:20px;color:#fff;font-weight:800;padding-bottom:10px}
-.product{position:fixed;left:35px;bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer}
+.product{position:fixed;left:calc(35px + var(--prod-ox));bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer;transform-origin:bottom center;transform:translateY(var(--prod-oy)) scale(var(--prod-scale))}
 .tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
 @keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}`;
     },
@@ -715,16 +788,37 @@ animate();
     extraSettings: ['interval'],
 
     generateCSS() {
-      return `*{padding:0;margin:0;box-sizing:border-box}
+      const c = (S && S.cfg) || {};
+      const ls = c.logoScale   || 1;
+      const lox = c.logoOffsetX || 0;
+      const loy = c.logoOffsetY || 0;
+      const cs = c.ctaScale    || 1;
+      const cox = c.ctaOffsetX || 0;
+      const coy = c.ctaOffsetY || 0;
+      const ps = c.productScale   || 1;
+      const pox = c.productOffsetX || 0;
+      const poy = c.productOffsetY || 0;
+      return `:root{
+  --logo-scale:${ls};
+  --logo-ox:${lox}px;
+  --logo-oy:${loy}px;
+  --cta-scale:${cs};
+  --cta-ox:${cox}px;
+  --cta-oy:${coy}px;
+  --prod-scale:${ps};
+  --prod-ox:${pox}px;
+  --prod-oy:${poy}px;
+}
+*{padding:0;margin:0;box-sizing:border-box}
 body{width:100%;height:150px;overflow:hidden;background:#0a1520;cursor:pointer}
 .video-wrap{position:fixed;left:0;bottom:0;width:55%;height:150px;overflow:hidden}
 video{width:100%;height:100%;object-fit:cover;display:block}
 .unmute{position:absolute;top:4px;left:4px;width:22px;height:22px;cursor:pointer;z-index:20;opacity:0.8;object-fit:contain}
 .unmute:hover{opacity:1}
-.logo{position:fixed;right:4%;top:10px;height:34px;object-fit:contain;cursor:pointer;z-index:10}
+.logo{position:fixed;right:4%;top:10px;height:34px;object-fit:contain;cursor:pointer;z-index:10;transform-origin:center;transform:translate(var(--logo-ox),var(--logo-oy)) scale(var(--logo-scale))}
 .overline{position:fixed;right:4%;top:50px;height:16px;object-fit:contain}
-.cta{position:fixed;right:4%;bottom:12px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear}
-.product{position:fixed;left:27%;transform:translateX(-50%);bottom:-150px;opacity:0;height:110px;object-fit:contain;cursor:pointer}
+.cta{position:fixed;right:4%;bottom:12px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear;transform-origin:center;transform:translate(var(--cta-ox),var(--cta-oy)) scale(var(--cta-scale))}
+.product{position:fixed;left:27%;bottom:-150px;opacity:0;height:110px;object-fit:contain;cursor:pointer;transform-origin:bottom center;transform:translate(calc(-50% + var(--prod-ox)),var(--prod-oy)) scale(var(--prod-scale))}
 .tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
 @keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}
 @keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}`;
@@ -807,14 +901,35 @@ products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES
     extraSettings: [],
 
     generateCSS() {
-      return `*{padding:0;margin:0;box-sizing:border-box}
+      const c = (S && S.cfg) || {};
+      const ls = c.logoScale   || 1;
+      const lox = c.logoOffsetX || 0;
+      const loy = c.logoOffsetY || 0;
+      const cs = c.ctaScale    || 1;
+      const cox = c.ctaOffsetX || 0;
+      const coy = c.ctaOffsetY || 0;
+      const ps = c.productScale   || 1;
+      const pox = c.productOffsetX || 0;
+      const poy = c.productOffsetY || 0;
+      return `:root{
+  --logo-scale:${ls};
+  --logo-ox:${lox}px;
+  --logo-oy:${loy}px;
+  --cta-scale:${cs};
+  --cta-ox:${cox}px;
+  --cta-oy:${coy}px;
+  --prod-scale:${ps};
+  --prod-ox:${pox}px;
+  --prod-oy:${poy}px;
+}
+*{padding:0;margin:0;box-sizing:border-box}
 body{width:100%;height:150px;overflow:hidden;background:transparent;cursor:pointer}
 .bg{position:fixed;bottom:0;left:0;width:100%;height:150px;object-fit:cover;z-index:-100}
-.logo{position:fixed;right:4%;top:8px;height:36px;object-fit:contain;z-index:10;cursor:pointer}
+.logo{position:fixed;right:4%;top:8px;height:36px;object-fit:contain;z-index:10;cursor:pointer;transform-origin:center;transform:translate(var(--logo-ox),var(--logo-oy)) scale(var(--logo-scale))}
 .overline{position:fixed;right:4%;bottom:46px;height:18px;object-fit:contain}
-.cta{position:fixed;right:4%;bottom:8px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear}
-.product{position:fixed;left:38%;transform:translateX(-50%);bottom:10px;height:118px;object-fit:contain;opacity:0;transition:opacity 0.45s ease,transform 0.45s ease;transform:translateX(-50%) scale(0.9);cursor:pointer}
-.product.active{opacity:1;transform:translateX(-50%) scale(1)}
+.cta{position:fixed;right:4%;bottom:8px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear;transform-origin:center;transform:translate(var(--cta-ox),var(--cta-oy)) scale(var(--cta-scale))}
+.product{position:fixed;left:38%;bottom:10px;height:118px;object-fit:contain;opacity:0;cursor:pointer;transform-origin:bottom center;transform:translate(calc(-50% + var(--prod-ox)),var(--prod-oy)) scale(calc(0.9 * var(--prod-scale)));transition:opacity 0.45s ease,transform 0.45s ease}
+.product.active{opacity:1;transform:translate(calc(-50% + var(--prod-ox)),var(--prod-oy)) scale(var(--prod-scale))}
 .content{position:fixed;top:0;right:0;width:1px;overflow:hidden;pointer-events:none;visibility:hidden}
 .item{height:100px}
 @keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}`;
@@ -1050,6 +1165,26 @@ function renderSettings() {
     });
   }
 
+  function addRangeControl(parent, key, label, min, max, step, defaultValue, unit) {
+    const current = S.cfg[key] !== undefined ? S.cfg[key] : defaultValue;
+    const field = document.createElement('div');
+    field.className = 'field';
+    field.innerHTML = `<label>${label}</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="range" id="sf_${key}" min="${min}" max="${max}" step="${step}" value="${current}">
+        <span style="font-size:10px;color:#c9d1d9;min-width:34px;text-align:right">${current}${unit||''}</span>
+      </div>`;
+    const input = field.querySelector('input');
+    const valueLabel = field.querySelector('span');
+    input.addEventListener('input', e => {
+      const v = Number(e.target.value);
+      S.cfg[key] = v;
+      valueLabel.textContent = v + (unit || '');
+      schedulePreview();
+    });
+    parent.appendChild(field);
+  }
+
   addField('brandName', 'Campaign / Brand Name', 'text', 'Elanza Black Friday');
   addField('clickUrl',  'Click URL',              'url',  'https://brand.com/campaign');
 
@@ -1218,6 +1353,30 @@ function renderSettings() {
   });
 
   panel.appendChild(motionGroup);
+
+  // Layout fine‑tune (applied consistently across templates)
+  const layoutGroup = document.createElement('div');
+  layoutGroup.innerHTML = '<div class="color-section-title">Layout fine‑tune</div>';
+  const layoutInner = document.createElement('div');
+  layoutInner.className = 'settings';
+
+  // Products
+  addRangeControl(layoutInner, 'productScale',   'Product scale',        0.7, 1.4, 0.01, 1,    '×');
+  addRangeControl(layoutInner, 'productOffsetX', 'Product X offset (px)', -40, 40, 1, 0,      'px');
+  addRangeControl(layoutInner, 'productOffsetY', 'Product Y offset (px)', -40, 40, 1, 0,      'px');
+
+  // Logo
+  addRangeControl(layoutInner, 'logoScale',      'Logo scale',           0.7, 1.4, 0.01, 1,   '×');
+  addRangeControl(layoutInner, 'logoOffsetX',    'Logo X offset (px)',   -40, 40, 1, 0,       'px');
+  addRangeControl(layoutInner, 'logoOffsetY',    'Logo Y offset (px)',   -40, 40, 1, 0,       'px');
+
+  // CTA
+  addRangeControl(layoutInner, 'ctaScale',       'CTA scale',            0.7, 1.4, 0.01, 1,   '×');
+  addRangeControl(layoutInner, 'ctaOffsetX',     'CTA X offset (px)',    -40, 40, 1, 0,       'px');
+  addRangeControl(layoutInner, 'ctaOffsetY',     'CTA Y offset (px)',    -40, 40, 1, 0,       'px');
+
+  layoutGroup.appendChild(layoutInner);
+  panel.appendChild(layoutGroup);
 }
 
 // ================================================================
