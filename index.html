@@ -90,29 +90,55 @@ input[type=file]{display:none}
 .preview-actions{display:flex;gap:8px;align-items:center}
 .btn-sm{background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:4px 12px;font-size:11px;cursor:pointer;transition:all 0.15s;font-family:inherit}
 .btn-sm:hover{border-color:#58a6ff;color:#58a6ff}
-.preview-body{flex:1;display:flex;overflow:hidden}
+.preview-body{flex:1;display:flex;overflow:hidden;align-items:center;justify-content:center;padding:14px;gap:16px}
 
-/* Mock browser */
-.mock-browser{flex:1;margin:12px;margin-right:6px;border-radius:10px;border:1px solid #30363d;overflow:hidden;display:flex;flex-direction:column}
-.browser-bar{background:#21262d;padding:7px 12px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.b-dots{display:flex;gap:5px}
-.b-dots span{width:10px;height:10px;border-radius:50%}
-.b-dots span:nth-child(1){background:#f85149}
-.b-dots span:nth-child(2){background:#f0883e}
-.b-dots span:nth-child(3){background:#3fb950}
-.b-url{flex:1;background:#0d1117;border-radius:4px;padding:3px 10px;font-size:11px;color:#8b949e;text-align:center}
-.browser-page{flex:1;background:#f0f0f0;position:relative;overflow:hidden;display:flex;flex-direction:column}
-.mock-content{flex:1;padding:16px;overflow:hidden;display:flex;flex-direction:column;gap:8px}
-.m-hdr{height:32px;background:#ddd;border-radius:4px}
-.m-line{height:9px;background:#ddd;border-radius:4px}
-.m-line.w90{width:90%}.m-line.w70{width:70%}.m-line.w80{width:80%}
-.m-line.w55{width:55%}.m-line.w65{width:65%}.m-line.w40{width:40%}
-.m-img-ph{height:55px;background:#ccc;border-radius:4px}
-.ad-slot{height:150px;flex-shrink:0;position:relative;overflow:hidden;background:#111}
+/* Phone frame */
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;height:100%}
+.phone-label{font-size:10px;color:#6e7681;font-weight:600;letter-spacing:0.5px;text-transform:uppercase}
+.phone-frame{width:390px;height:calc(100% - 24px);min-height:500px;max-height:820px;background:#1c1c1e;border-radius:46px;border:10px solid #2a2a2e;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 1px #3d3d3f,0 28px 70px rgba(0,0,0,0.7),inset 0 0 0 1px #111;position:relative;flex-shrink:0}
+.phone-notch{height:36px;background:#1c1c1e;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.phone-notch-pill{width:126px;height:34px;background:#000;border-radius:0 0 24px 24px;position:absolute;top:0;display:flex;align-items:center;justify-content:center;gap:9px}
+.notch-camera{width:11px;height:11px;background:#1a1a1a;border-radius:50%;border:1.5px solid #2a2a2a}
+.notch-speaker{width:44px;height:4px;background:#1a1a1a;border-radius:3px}
+.phone-status{display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:11px;color:#666;font-weight:600;height:18px;flex-shrink:0;background:#f8f8f8;letter-spacing:0.2px}
+.phone-body{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f8f8f8}
+.phone-content{flex:1;overflow-y:scroll;overflow-x:hidden;background:#f2f2f7}
+.phone-content::-webkit-scrollbar{display:none}
+/* Dummy page content */
+.pc-topbar{height:50px;background:#fff;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:10}
+.pc-topbar-logo{width:34px;height:34px;background:#e5e5e5;border-radius:8px;flex-shrink:0}
+.pc-topbar-title{flex:1;height:13px;background:#e0e0e0;border-radius:4px;max-width:110px}
+.pc-topbar-icon{width:28px;height:28px;background:#f0f0f0;border-radius:50%;flex-shrink:0}
+.pc-hero{height:170px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);margin:0;position:relative;overflow:hidden}
+.pc-hero::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(99,102,241,0.15);border-radius:50%}
+.pc-hero::after{content:'';position:absolute;bottom:-10px;left:20px;width:60px;height:60px;background:rgba(59,130,246,0.2);border-radius:50%}
+.pc-section{padding:12px 12px 0}
+.pc-section-title{height:11px;background:#d1d1d6;border-radius:4px;width:55%;margin-bottom:10px}
+.pc-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pc-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.pc-card-img{height:72px;background:linear-gradient(135deg,#f1f5f9,#e2e8f0)}
+.pc-card-body{padding:8px}
+.pc-card-t{height:9px;background:#e2e8f0;border-radius:3px;margin-bottom:5px}
+.pc-card-s{height:7px;background:#f1f5f9;border-radius:3px;width:65%}
+.pc-text-block{background:#fff;border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.pc-tb-line{height:8px;background:#ebebeb;border-radius:3px;margin-bottom:7px}
+.pc-tb-line:last-child{margin-bottom:0}
+.pc-img-wide{height:120px;background:linear-gradient(135deg,#fef9c3,#fde68a);border-radius:12px;margin-bottom:10px}
+.pc-list{background:#fff;border-radius:12px;overflow:hidden;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.pc-list-item{padding:10px 12px;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px}
+.pc-list-item:last-child{border-bottom:none}
+.pc-li-dot{width:8px;height:8px;border-radius:50%;background:#c7d2fe;flex-shrink:0}
+.pc-li-text{height:8px;background:#e8e8e8;border-radius:3px;width:80%;margin-bottom:3px}
+.pc-li-sub{height:6px;background:#f0f0f0;border-radius:3px;width:50%}
+/* Phone ad: sticky at bottom, outside scroll */
+.phone-ad{height:150px;flex-shrink:0;background:#111;position:relative;overflow:hidden}
 .ad-frame{width:100%;height:100%;border:none;display:block}
+/* Phone home bar */
+.phone-home{height:28px;background:#1c1c1e;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.home-indicator{width:120px;height:4px;background:#3a3a3c;border-radius:3px}
 
 /* File tree */
-.file-tree-panel{width:175px;min-width:175px;margin:12px 12px 12px 6px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.file-tree-panel{width:160px;min-width:160px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;align-self:flex-start;margin-top:4px}
 .ft-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b949e;font-weight:600;margin-bottom:8px}
 .ft-folder{font-size:11px;color:#e6edf3;display:flex;align-items:center;gap:5px;margin-bottom:4px;font-weight:600}
 .ft-item{font-size:10px;color:#8b949e;padding:2px 0 2px 14px;display:flex;align-items:center;gap:4px}
@@ -182,26 +208,93 @@ input[type=file]{display:none}
       </div>
     </div>
     <div class="preview-body">
-      <div class="mock-browser">
-        <div class="browser-bar">
-          <div class="b-dots"><span></span><span></span><span></span></div>
-          <div class="b-url">publisher-site.com · Yektanet DB Billboard</div>
-        </div>
-        <div class="browser-page">
-          <div class="mock-content">
-            <div class="m-hdr"></div>
-            <div class="m-line w90"></div>
-            <div class="m-line w70"></div>
-            <div class="m-line w80"></div>
-            <div class="m-img-ph"></div>
-            <div class="m-line w55"></div>
-            <div class="m-line w65"></div>
-            <div class="m-line w40"></div>
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch">
+            <div class="phone-notch-pill">
+              <div class="notch-camera"></div>
+              <div class="notch-speaker"></div>
+              <div class="notch-camera"></div>
+            </div>
           </div>
-          <div class="ad-slot">
-            <iframe id="adFrame" class="ad-frame" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+          <div class="phone-status">
+            <span>9:41</span>
+            <span style="letter-spacing:1px">●●●●</span>
+            <span>▐▌</span>
           </div>
+          <div class="phone-body">
+            <div class="phone-content" id="phoneContent">
+              <div class="pc-topbar">
+                <div class="pc-topbar-logo"></div>
+                <div class="pc-topbar-title"></div>
+                <div class="pc-topbar-icon"></div>
+              </div>
+              <div class="pc-hero"></div>
+              <div class="pc-section">
+                <div class="pc-section-title"></div>
+                <div class="pc-cards">
+                  <div class="pc-card"><div class="pc-card-img"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                </div>
+                <div class="pc-text-block">
+                  <div class="pc-tb-line"></div>
+                  <div class="pc-tb-line" style="width:85%"></div>
+                  <div class="pc-tb-line" style="width:90%"></div>
+                  <div class="pc-tb-line" style="width:70%"></div>
+                </div>
+                <div class="pc-img-wide"></div>
+                <div class="pc-list">
+                  <div class="pc-list-item"><div class="pc-li-dot"></div><div><div class="pc-li-text"></div><div class="pc-li-sub"></div></div></div>
+                  <div class="pc-list-item"><div class="pc-li-dot"></div><div><div class="pc-li-text" style="width:70%"></div><div class="pc-li-sub"></div></div></div>
+                  <div class="pc-list-item"><div class="pc-li-dot"></div><div><div class="pc-li-text" style="width:85%"></div><div class="pc-li-sub"></div></div></div>
+                  <div class="pc-list-item"><div class="pc-li-dot"></div><div><div class="pc-li-text" style="width:60%"></div><div class="pc-li-sub"></div></div></div>
+                </div>
+              </div>
+              <div class="pc-section">
+                <div class="pc-section-title"></div>
+                <div class="pc-cards">
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#e0f2fe,#bae6fd)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#f5f3ff,#ddd6fe)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                </div>
+                <div class="pc-text-block">
+                  <div class="pc-tb-line"></div>
+                  <div class="pc-tb-line" style="width:80%"></div>
+                  <div class="pc-tb-line" style="width:92%"></div>
+                </div>
+                <div class="pc-img-wide" style="background:linear-gradient(135deg,#fdf4ff,#f5d0fe)"></div>
+                <div class="pc-list">
+                  <div class="pc-list-item"><div class="pc-li-dot" style="background:#a7f3d0"></div><div><div class="pc-li-text"></div><div class="pc-li-sub"></div></div></div>
+                  <div class="pc-list-item"><div class="pc-li-dot" style="background:#fbcfe8"></div><div><div class="pc-li-text" style="width:75%"></div><div class="pc-li-sub"></div></div></div>
+                  <div class="pc-list-item"><div class="pc-li-dot" style="background:#bae6fd"></div><div><div class="pc-li-text" style="width:88%"></div><div class="pc-li-sub"></div></div></div>
+                </div>
+              </div>
+              <div class="pc-section">
+                <div class="pc-section-title"></div>
+                <div class="pc-cards">
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#fff7ed,#fed7aa)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#f0fdf4,#bbf7d0)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                  <div class="pc-card"><div class="pc-card-img" style="background:linear-gradient(135deg,#fef2f2,#fecaca)"></div><div class="pc-card-body"><div class="pc-card-t"></div><div class="pc-card-s"></div></div></div>
+                </div>
+                <div class="pc-text-block">
+                  <div class="pc-tb-line"></div>
+                  <div class="pc-tb-line" style="width:75%"></div>
+                  <div class="pc-tb-line" style="width:88%"></div>
+                  <div class="pc-tb-line" style="width:65%"></div>
+                </div>
+              </div>
+              <div style="height:16px"></div>
+            </div>
+            <!-- AD sticky at bottom — outside scroll container -->
+            <div class="phone-ad">
+              <iframe id="adFrame" class="ad-frame" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+            </div>
+          </div>
+          <div class="phone-home"><div class="home-indicator"></div></div>
         </div>
+        <div class="phone-label">390px · Live Preview · Scroll to test</div>
       </div>
       <div class="file-tree-panel">
         <div class="ft-title">ZIP Contents</div>
@@ -1156,6 +1249,23 @@ function init() {
   renderFileTree();
   document.getElementById('exportBtn').addEventListener('click', exportZip);
   schedulePreview();
+
+  // Proxy scroll events into the ad iframe for Scroll Reactive template
+  document.getElementById('phoneContent').addEventListener('scroll', function() {
+    const scrolledPx = this.scrollTop;
+    const heightOfPage = this.scrollHeight;
+    const maxScroll = heightOfPage - this.clientHeight;
+    const percent = maxScroll > 0 ? (scrolledPx / maxScroll) * 100 : 0;
+    const frame = document.getElementById('adFrame');
+    try {
+      frame.contentWindow.postMessage({
+        type: 'yn-window-scroll',
+        scrolled: percent,
+        scrolledInPx: scrolledPx,
+        heightOfPage: heightOfPage
+      }, '*');
+    } catch(e) {}
+  });
 }
 
 init();
