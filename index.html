@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB Creator · Uranus Agency</title>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;height:100vh;overflow:hidden}
+
+/* ============================================================
+   APP LAYOUT
+   ============================================================ */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar{width:300px;min-width:300px;background:#161b22;border-right:1px solid #30363d;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-inner{flex:1;overflow-y:auto;overflow-x:hidden}
+.sidebar-header{padding:14px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:10px;flex-shrink:0;background:#161b22;position:sticky;top:0;z-index:10}
+.sidebar-header h1{font-size:15px;font-weight:700;color:#f0f6fc;flex:1}
+.badge{font-size:10px;background:#f0883e18;color:#f0883e;border:1px solid #f0883e33;padding:2px 8px;border-radius:20px;font-weight:600}
+.section{padding:14px 16px;border-bottom:1px solid #30363d}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b949e;font-weight:600;margin-bottom:10px}
+
+/* ============================================================
+   TEMPLATE CARDS
+   ============================================================ */
+.template-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tpl-card{background:#21262d;border:1.5px solid #30363d;border-radius:8px;padding:10px 8px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:5px}
+.tpl-card:hover{border-color:#58a6ff44;background:#1c2128}
+.tpl-card.active{border-color:#f0883e;background:#f0883e0a}
+.tpl-icon{width:100%;height:38px;border-radius:5px;overflow:hidden;background:#0d1117}
+.tpl-icon svg{width:100%;height:100%}
+.tpl-name{font-size:11px;font-weight:600;color:#e6edf3;text-align:center}
+.tpl-sub{font-size:9px;color:#8b949e;text-align:center;line-height:1.4}
+
+/* ============================================================
+   ASSET SLOTS
+   ============================================================ */
+.slots-grid{display:flex;flex-direction:column;gap:5px}
+.slot{display:flex;align-items:center;gap:8px;background:#21262d;border:1.5px dashed #30363d;border-radius:6px;padding:7px 9px;cursor:pointer;transition:all 0.15s;position:relative}
+.slot:hover{border-color:#58a6ff55}
+.slot.has-file{border-style:solid;border-color:#3fb95055;background:#3fb9500a}
+.slot.drag-over{border-color:#58a6ff;background:#58a6ff11;border-style:solid}
+.slot.req-miss{border-color:#f8514966}
+.slot-thumb{width:36px;height:36px;border-radius:4px;object-fit:cover;background:#30363d;flex-shrink:0}
+.slot-ph{width:36px;height:36px;border-radius:4px;background:#30363d;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.slot-info{flex:1;min-width:0}
+.slot-label{font-size:11px;font-weight:600;color:#e6edf3;display:flex;align-items:center;gap:3px}
+.slot-star{color:#f0883e;font-size:9px}
+.slot-desc{font-size:10px;color:#8b949e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-clear{width:18px;height:18px;border-radius:50%;background:#f8514922;border:none;color:#f85149;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;line-height:1;padding-bottom:1px}
+.slot-clear:hover{background:#f8514944}
+input[type=file]{display:none}
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+.settings{display:flex;flex-direction:column;gap:9px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+.field input,.field select{background:#21262d;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;padding:7px 10px;font-size:12px;font-family:inherit;outline:none;transition:border-color 0.15s;width:100%}
+.field input:focus,.field select:focus{border-color:#58a6ff}
+.field input[type=color]{height:32px;padding:2px 4px;cursor:pointer}
+.field input[type=datetime-local]{color-scheme:dark}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.color-section-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b949e;font-weight:600;margin-bottom:8px;margin-top:4px}
+
+/* ============================================================
+   EXPORT AREA
+   ============================================================ */
+.export-area{padding:12px 16px;flex-shrink:0;border-top:1px solid #30363d;background:#161b22}
+.export-btn{width:100%;background:#f0883e;color:#0d1117;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
+.export-btn:hover{background:#ffa05a;transform:translateY(-1px)}
+.export-btn:active{transform:translateY(0)}
+.export-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.export-note{font-size:10px;color:#8b949e;text-align:center;margin-top:6px}
+
+/* ============================================================
+   PREVIEW AREA
+   ============================================================ */
+.preview-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0d1117}
+.preview-header{padding:10px 16px;border-bottom:1px solid #30363d;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.preview-title{font-size:12px;font-weight:600;color:#e6edf3}
+.preview-actions{display:flex;gap:8px;align-items:center}
+.btn-sm{background:#21262d;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:4px 12px;font-size:11px;cursor:pointer;transition:all 0.15s;font-family:inherit}
+.btn-sm:hover{border-color:#58a6ff;color:#58a6ff}
+.preview-body{flex:1;display:flex;overflow:hidden}
+
+/* Mock browser */
+.mock-browser{flex:1;margin:12px;margin-right:6px;border-radius:10px;border:1px solid #30363d;overflow:hidden;display:flex;flex-direction:column}
+.browser-bar{background:#21262d;padding:7px 12px;border-bottom:1px solid #30363d;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.b-dots{display:flex;gap:5px}
+.b-dots span{width:10px;height:10px;border-radius:50%}
+.b-dots span:nth-child(1){background:#f85149}
+.b-dots span:nth-child(2){background:#f0883e}
+.b-dots span:nth-child(3){background:#3fb950}
+.b-url{flex:1;background:#0d1117;border-radius:4px;padding:3px 10px;font-size:11px;color:#8b949e;text-align:center}
+.browser-page{flex:1;background:#f0f0f0;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.mock-content{flex:1;padding:16px;overflow:hidden;display:flex;flex-direction:column;gap:8px}
+.m-hdr{height:32px;background:#ddd;border-radius:4px}
+.m-line{height:9px;background:#ddd;border-radius:4px}
+.m-line.w90{width:90%}.m-line.w70{width:70%}.m-line.w80{width:80%}
+.m-line.w55{width:55%}.m-line.w65{width:65%}.m-line.w40{width:40%}
+.m-img-ph{height:55px;background:#ccc;border-radius:4px}
+.ad-slot{height:150px;flex-shrink:0;position:relative;overflow:hidden;background:#111}
+.ad-frame{width:100%;height:100%;border:none;display:block}
+
+/* File tree */
+.file-tree-panel{width:175px;min-width:175px;margin:12px 12px 12px 6px;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.ft-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#8b949e;font-weight:600;margin-bottom:8px}
+.ft-folder{font-size:11px;color:#e6edf3;display:flex;align-items:center;gap:5px;margin-bottom:4px;font-weight:600}
+.ft-item{font-size:10px;color:#8b949e;padding:2px 0 2px 14px;display:flex;align-items:center;gap:4px}
+.ft-item.ok{color:#3fb950}
+.ft-item.miss{color:#f85149}
+.ft-item.gen{color:#58a6ff}
+.ft-item.opt{color:#6e7681}
+
+/* Toast */
+.toast{position:fixed;bottom:16px;right:16px;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:10px 16px;font-size:13px;color:#e6edf3;z-index:99999;transform:translateY(60px);opacity:0;transition:all 0.3s;pointer-events:none;max-width:280px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:#3fb95066}
+.toast.err{border-color:#f8514966}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#484f58}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <svg width="22" height="22" viewBox="0 0 22 22">
+        <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" fill="#f0883e" opacity="0.15"/>
+        <polygon points="11,2 20,7 20,15 11,20 2,15 2,7" fill="none" stroke="#f0883e" stroke-width="1.5"/>
+        <polygon points="11,7 16,10 16,14 11,17 6,14 6,10" fill="#f0883e"/>
+      </svg>
+      <h1>DB Creator</h1>
+      <span class="badge">Uranus</span>
+    </div>
+    <div class="sidebar-inner">
+      <div class="section">
+        <div class="section-title">Template</div>
+        <div class="template-grid" id="tplGrid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Assets <span style="color:#8b949e;font-weight:400;text-transform:none;letter-spacing:0">— drag &amp; drop or click</span></div>
+        <div class="slots-grid" id="slotsGrid"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Settings</div>
+        <div class="settings" id="settingsPanel"></div>
+      </div>
+    </div>
+    <div class="export-area">
+      <button class="export-btn" id="exportBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Export ZIP
+      </button>
+      <div class="export-note" id="exportNote">Fill in assets · click to export</div>
+    </div>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="preview-area">
+    <div class="preview-header">
+      <div class="preview-title">Live Preview · 150px Sticky DB · Yektanet</div>
+      <div class="preview-actions">
+        <button class="btn-sm" onclick="updatePreview()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="mock-browser">
+        <div class="browser-bar">
+          <div class="b-dots"><span></span><span></span><span></span></div>
+          <div class="b-url">publisher-site.com · Yektanet DB Billboard</div>
+        </div>
+        <div class="browser-page">
+          <div class="mock-content">
+            <div class="m-hdr"></div>
+            <div class="m-line w90"></div>
+            <div class="m-line w70"></div>
+            <div class="m-line w80"></div>
+            <div class="m-img-ph"></div>
+            <div class="m-line w55"></div>
+            <div class="m-line w65"></div>
+            <div class="m-line w40"></div>
+          </div>
+          <div class="ad-slot">
+            <iframe id="adFrame" class="ad-frame" scrolling="no" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+          </div>
+        </div>
+      </div>
+      <div class="file-tree-panel">
+        <div class="ft-title">ZIP Contents</div>
+        <div id="fileTree"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+'use strict';
+
+// ================================================================
+// STATE
+// ================================================================
+const S = {
+  tpl: 'carousel',
+  assets: {},
+  cfg: {
+    brandName: '',
+    clickUrl: '',
+    langCode: 'fa',
+    langDir: 'rtl',
+    interval: 5,
+    countdownDate: '',
+    title: 'عنوان کمپین',
+    subtitle: 'زیر عنوان',
+    ctaText: 'خرید کنید',
+    bgColor: '#1a0a2e',
+    titleColor: '#ffffff',
+    subtitleColor: '#ffe066',
+    ctaBg: '#FFD700',
+    ctaTextColor: '#000000',
+  }
+};
+
+// ================================================================
+// TAGS.JS — universal for all Yektanet DB ads
+// ================================================================
+const TAGS_JS = `const ALL_EVENT_TYPES={WINDOW_LOADED:'WINDOW_LOADED',DOM_CONTENT_LOADED:'DOM_CONTENT_LOADED',TIMER_0_SECOND:'TIMER_0_SECOND',TIMER_5_SECOND:'TIMER_5_SECOND',TIMER_10_SECOND:'TIMER_10_SECOND',TIMER_15_SECOND:'TIMER_15_SECOND',TIMER_60_SECOND:'TIMER_60_SECOND',VISIT_SLIDE01:'VISIT_SLIDE01',VISIT_SLIDE02:'VISIT_SLIDE02',VISIT_SLIDE03:'VISIT_SLIDE03',VISIT_SLIDE04:'VISIT_SLIDE04',VISIT_SLIDE05:'VISIT_SLIDE05',VISIT_SLIDE06:'VISIT_SLIDE06',CLICK1:'CLICK1',CLICK2:'CLICK2',CLICK3:'CLICK3',CLICK4:'CLICK4',CLICK5:'CLICK5',CLICK6:'CLICK6',CLICK_AUTOPLAY:'AUTOPLAY1',LOOP:'LOOP'};
+function fire_tag(t){if(!Object.values(ALL_EVENT_TYPES).includes(t)){console.warn('TAG NOT ALLOWED:',t);return;}window.parent.postMessage({type:'yn::event',event_type:t},'*');}
+fire_tag(ALL_EVENT_TYPES.TIMER_0_SECOND);
+window.onload=()=>fire_tag(ALL_EVENT_TYPES.WINDOW_LOADED);
+document.addEventListener('DOMContentLoaded',()=>{fire_tag(ALL_EVENT_TYPES.DOM_CONTENT_LOADED);let t=Date.now(),f5=true,f10=true,f15=true,f60=true;let iv=setInterval(()=>{const s=(Date.now()-t)/1000;if(s>=5&&f5){f5=false;fire_tag(ALL_EVENT_TYPES.TIMER_5_SECOND);}if(s>=10&&f10){f10=false;fire_tag(ALL_EVENT_TYPES.TIMER_10_SECOND);}if(s>=15&&f15){f15=false;fire_tag(ALL_EVENT_TYPES.TIMER_15_SECOND);}if(s>=60&&f60){f60=false;fire_tag(ALL_EVENT_TYPES.TIMER_60_SECOND);clearInterval(iv);}},1001);});`;
+
+// ================================================================
+// CLICK URL SCRIPT — injected inline at bottom of every ad HTML
+// ================================================================
+const CLICK_SCRIPT = `(function(){function gp(n){n=n.replace(/[\\[]/,'\\\\[').replace(/[\\]]/,'\\\\]');var r=new RegExp('[\\\\?&]'+n+'=([^&#]*)');var x=r.exec(location.search);return x===null?'':decodeURIComponent(x[1].replace(/\\+/g,' '));}var cu=gp('click_url');if(cu){document.addEventListener('click',function(){window.open(cu,'_blank');});}})();`;
+
+// ================================================================
+// PLACEHOLDER — shown in preview for missing optional assets
+// ================================================================
+function ph(label, color) {
+  color = color || '#333';
+  return 'data:image/svg+xml,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80" fill="' + color + '" rx="4" opacity="0.25"/><rect width="120" height="80" fill="none" stroke="#555" stroke-width="1" stroke-dasharray="4,3" rx="4"/><text x="50%" y="52%" fill="#777" font-size="10" text-anchor="middle" font-family="sans-serif">' + label + '</text></svg>'
+  );
+}
+
+// ================================================================
+// TEMPLATE DEFINITIONS
+// ================================================================
+const TEMPLATES = {
+
+  // ──────────────────────────────────────────────────────────────
+  // 1. PRODUCT CAROUSEL (most common — Elanza, AppStar, etc.)
+  //    Logo slides up → Stick appears → CTA pulses → Products rotate
+  // ──────────────────────────────────────────────────────────────
+  carousel: {
+    id: 'carousel',
+    name: 'Product Carousel',
+    sub: 'Logo → Stick → CTA → Products rotate',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#1a0a2e"/><rect x="58" width="42" height="38" fill="#2d1050" rx="2"/><ellipse cx="78" cy="12" rx="9" ry="5" fill="#f0883e" opacity="0.6"/><rect x="62" y="18" width="30" height="4" rx="2" fill="#f0883e" opacity="0.4"/><rect x="5" y="4" width="16" height="30" rx="2" fill="#f28" opacity="0.5"/><rect x="24" y="12" width="12" height="18" rx="2" fill="#48f" opacity="0.5"/><rect x="75" y="26" width="16" height="6" rx="3" fill="#FFD700"/><line x1="38" y1="8" x2="38" y2="32" stroke="#555" stroke-width="1"/></svg>`,
+    slots: [
+      { id:'logo',     label:'Logo',          icon:'🏢', req:true,  accept:'image/*', desc:'Brand logo (slides up on load)' },
+      { id:'bg',       label:'Background',    icon:'🖼', req:true,  accept:'image/*', desc:'Right-side bg panel (70% width)' },
+      { id:'main',     label:'Character',     icon:'🧑', req:false, accept:'image/*', desc:'Mascot / person (left edge)' },
+      { id:'stick',    label:'Stick / Wand',  icon:'🪄', req:false, accept:'image/*', desc:'Pointer element (wobbles on slide)' },
+      { id:'percent',  label:'Percent Badge', icon:'💯', req:false, accept:'image/*', desc:'Discount badge' },
+      { id:'overline', label:'Overline',      icon:'📝', req:false, accept:'image/*', desc:'Tagline text image (far right)' },
+      { id:'cta',      label:'CTA Button',    icon:'👆', req:true,  accept:'image/*', desc:'Call-to-action (pulses forever)' },
+      { id:'product1', label:'Product 1',     icon:'📦', req:true,  accept:'image/*', desc:'First product in carousel' },
+      { id:'product2', label:'Product 2',     icon:'📦', req:false, accept:'image/*', desc:'Second product' },
+      { id:'product3', label:'Product 3',     icon:'📦', req:false, accept:'image/*', desc:'Third product' },
+    ],
+    extraSettings: ['interval'],
+
+    generateCSS() {
+      return `*{padding:0;margin:0;box-sizing:border-box}
+body{width:100%;height:150px;overflow:hidden;background:transparent;cursor:pointer}
+.bg{position:fixed;right:0;bottom:0;width:70%;height:120px;z-index:-100;object-fit:cover;border-top-left-radius:12px}
+.logo{position:fixed;right:calc(35% - 65px);z-index:10;bottom:-200px;width:130px;object-fit:contain}
+.main{position:fixed;left:-15px;height:120px;bottom:-10px;object-fit:contain}
+.percent{position:fixed;right:calc(35% - 5px);height:80px;bottom:50px;object-fit:contain}
+.overline{position:fixed;right:18px;height:108px;bottom:5px;object-fit:contain}
+.cta{position:fixed;right:calc(35% + 50px);height:28px;z-index:99;bottom:18px;opacity:0;cursor:pointer;object-fit:contain}
+.stick{position:fixed;bottom:8px;left:45px;z-index:10;width:120px;transform-origin:bottom center;opacity:0;pointer-events:none;object-fit:contain}
+.product{position:fixed;left:35px;z-index:5;bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer}
+.product1{height:70px}.product2{height:80px}.product3{height:80px}
+.tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}
+.stick-magic{animation:hammer 0.6s ease-in-out}
+@keyframes hammer{0%{rotate:0deg}25%{rotate:-10deg}50%{rotate:8deg}75%{rotate:-5deg}100%{rotate:0deg}}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}`;
+    },
+
+    generateJS(s) {
+      const ms = (s.cfg.interval || 5) * 1000;
+      return `const logo=document.querySelector('.logo');
+const cta=document.querySelector('.cta');
+const stick=document.querySelector('.stick');
+const products=document.querySelectorAll('.product');
+let counter=0;
+const INTERVAL=${ms};
+if(logo){gsap.to(logo,{duration:1,bottom:'115px',onComplete:()=>{
+  if(stick){gsap.to(stick,{opacity:1,duration:0.5,onComplete:()=>{
+    if(cta){cta.classList.add('tapesh');gsap.to(cta,{opacity:1,duration:1,onComplete:()=>{
+      intervalHandler();setInterval(intervalHandler,INTERVAL);
+    }});}else{intervalHandler();setInterval(intervalHandler,INTERVAL);}
+  }});}else{if(cta){cta.classList.add('tapesh');gsap.to(cta,{opacity:1,duration:1});}intervalHandler();setInterval(intervalHandler,INTERVAL);}
+}});}else{intervalHandler();setInterval(intervalHandler,INTERVAL);}
+function fadeAll(){products.forEach(p=>gsap.to(p,{bottom:'0px',opacity:0,duration:0.8}));}
+function intervalHandler(){
+  if(stick){stick.classList.remove('stick-magic');void stick.offsetWidth;stick.classList.add('stick-magic');}
+  fadeAll();
+  const tags=[ALL_EVENT_TYPES.VISIT_SLIDE01,ALL_EVENT_TYPES.VISIT_SLIDE02,ALL_EVENT_TYPES.VISIT_SLIDE03];
+  if(tags[counter])fire_tag(tags[counter]);
+  if(products[counter]){gsap.to(products[counter],{bottom:'72px',duration:0.8,opacity:1,onComplete:()=>{counter=(counter+1)%products.length;}});}
+}
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES.CLICK3,ALL_EVENT_TYPES.CLICK4,ALL_EVENT_TYPES.CLICK5];if(t[i])fire_tag(t[i]);}));`;
+    },
+
+    generateBody(s, getA, mode) {
+      const show = (id, req) => req || !!s.assets[id] || mode === 'preview';
+      const lines = [];
+      if(show('logo',true))     lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('bg',true))       lines.push(`  <img class="bg" src="${getA('bg')}"/>`);
+      if(show('main',false))    lines.push(`  <img class="main" src="${getA('main')}"/>`);
+      if(show('percent',false)) lines.push(`  <img class="percent" src="${getA('percent')}"/>`);
+      if(show('overline',false))lines.push(`  <img class="overline" src="${getA('overline')}"/>`);
+      if(show('stick',false))   lines.push(`  <img class="stick" src="${getA('stick')}"/>`);
+      if(show('cta',true))      lines.push(`  <img class="cta" src="${getA('cta')}"/>`);
+      if(show('product1',true)) lines.push(`  <img class="product product1" src="${getA('product1')}"/>`);
+      if(show('product2',false))lines.push(`  <img class="product product2" src="${getA('product2')}"/>`);
+      if(show('product3',false))lines.push(`  <img class="product product3" src="${getA('product3')}"/>`);
+      return lines.join('\n');
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // 2. STANDARD 3-SLIDE (Digikala pattern)
+  //    Intro slides in → BG reveals → Main content → Products + CTA
+  // ──────────────────────────────────────────────────────────────
+  standard: {
+    id: 'standard',
+    name: 'Standard 3-Slide',
+    sub: 'Intro → Content → Products + CTA',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#0d2137"/><rect x="0" y="22" width="100" height="16" fill="#c00000" rx="2"/><rect x="8" y="6" width="35" height="20" rx="2" fill="#ff6600" opacity="0.7"/><circle cx="72" cy="16" r="11" fill="#f0883e" opacity="0.9"/><text x="72" y="20" font-size="9" fill="white" text-anchor="middle" font-weight="bold">17%</text><rect x="82" y="24" width="12" height="6" rx="3" fill="#FFD700"/></svg>`,
+    slots: [
+      { id:'logo',     label:'Logo',           icon:'🏢', req:true,  accept:'image/*', desc:'Brand logo (slides down from top)' },
+      { id:'bg',       label:'Background',     icon:'🖼', req:true,  accept:'image/*', desc:'Full-width bg panel (scaleY reveal)' },
+      { id:'intro',    label:'Intro Element',  icon:'🚂', req:true,  accept:'image/*', desc:'Enters from right, exits to left' },
+      { id:'percent',  label:'Percent Badge',  icon:'💯', req:false, accept:'image/*', desc:'Drops in from top on slide 2' },
+      { id:'overline', label:'Overline',       icon:'📝', req:false, accept:'image/*', desc:'Brand tagline (slides up in slide 3)' },
+      { id:'cta',      label:'CTA Button',     icon:'👆', req:true,  accept:'image/*', desc:'Slides up in slide 3, pulses' },
+      { id:'products', label:'Products Grid',  icon:'🗂', req:true,  accept:'image/*', desc:'Product grid image (slides in from left)' },
+    ],
+    extraSettings: [],
+
+    generateCSS() {
+      return `*{padding:0;margin:0;box-sizing:border-box}
+body{width:100%;height:150px;overflow:hidden;background:transparent}
+.intro{position:fixed;right:-650px;bottom:0;height:120px;z-index:99999;cursor:pointer}
+.intro img{height:100%;object-fit:contain}
+.bg{position:fixed;bottom:0;left:0;height:100px;width:100%;border-top-left-radius:15px;border-top-right-radius:15px;z-index:-999999;transform:scaleY(0);transform-origin:bottom center;object-fit:cover}
+.logo{width:100px;position:fixed;left:75%;transform:translateX(-50%);top:-100px;z-index:-1;object-fit:contain}
+.overline{width:84px;position:fixed;right:5%;bottom:-45px;object-fit:contain}
+.cta{width:84px;position:fixed;right:5%;bottom:-70px;cursor:pointer;object-fit:contain}
+.percent{position:fixed;left:26%;transform:translateX(-50%);width:30%;top:-128px;object-fit:contain}
+.products{width:calc(100% - 200px);position:fixed;left:-100%;bottom:20px;object-fit:contain}
+.star{opacity:0;position:fixed;font-size:14px;color:gold;z-index:999}
+.star1{right:2%;bottom:10px}.star2{right:8%;bottom:5px}
+.tapesh{animation:tapesh 0.75s infinite linear;transform-origin:center}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}`;
+    },
+
+    generateJS() {
+      return `document.addEventListener('DOMContentLoaded',()=>{
+const intro=document.querySelector('.intro');
+const logo=document.querySelector('.logo');
+const overline=document.querySelector('.overline');
+const cta=document.querySelector('.cta');
+const percent=document.querySelector('.percent');
+const bg=document.querySelector('.bg');
+const products=document.querySelector('.products');
+const stars=document.querySelectorAll('.star');
+if(intro)intro.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK3));
+if(percent)percent.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK4));
+if(products)products.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK5));
+fire_tag(ALL_EVENT_TYPES.VISIT_SLIDE01);
+if(intro){gsap.to(intro,{duration:10,right:'105%',ease:'linear',onComplete:init});}else{init();}
+function init(){
+  fire_tag(ALL_EVENT_TYPES.VISIT_SLIDE02);
+  const tl=gsap.timeline();
+  if(bg)tl.to(bg,{duration:1,transform:'scaleY(1)'});
+  if(logo)tl.to(logo,{duration:1,top:'10px',ease:'linear'});
+  if(percent){tl.to(percent,{top:'28px',duration:1,ease:'back.out(1.9)',onComplete:()=>setTimeout(final,4000)});}
+  else{tl.call(()=>setTimeout(final,4000));}
+}
+function final(){
+  fire_tag(ALL_EVENT_TYPES.VISIT_SLIDE03);
+  if(percent)gsap.to(percent,{duration:1,top:'200px'});
+  if(cta){gsap.to(cta,{duration:1,bottom:'10px'});cta.classList.add('tapesh');}
+  if(overline)gsap.to(overline,{duration:1,bottom:'35px'});
+  if(logo)gsap.to(logo,{duration:1,right:'5%',width:'84px',left:'initial',top:'30px',transform:'initial'});
+  if(products){gsap.to(products,{duration:1,left:'5%',onComplete:()=>{
+    stars.forEach(st=>{setInterval(()=>{st.style.opacity=1;setTimeout(()=>{st.style.opacity=0;},500);},2000+Math.random()*2000);});
+    setTimeout(()=>{fire_tag(ALL_EVENT_TYPES.LOOP);location.reload();},60000);
+  }});}
+}
+});`;
+    },
+
+    generateBody(s, getA, mode) {
+      const show = (id, req) => req || !!s.assets[id] || mode === 'preview';
+      const lines = [];
+      lines.push(`  <div class="intro"><img src="${getA('intro')}"/></div>`);
+      if(show('bg',true))       lines.push(`  <img class="bg" src="${getA('bg')}"/>`);
+      if(show('logo',true))     lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('overline',false))lines.push(`  <img class="overline" src="${getA('overline')}"/>`);
+      if(show('cta',true))      lines.push(`  <img class="cta" src="${getA('cta')}"/>`);
+      if(show('percent',false)) lines.push(`  <img class="percent" src="${getA('percent')}"/>`);
+      if(show('products',true)) lines.push(`  <img class="products" src="${getA('products')}"/>`);
+      lines.push(`  <div class="star star1">★</div><div class="star star2">★</div>`);
+      return lines.join('\n');
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // 3. COUNTDOWN TIMER (Snapppay pattern)
+  //    Live day/hour/min/sec countdown + product carousel
+  // ──────────────────────────────────────────────────────────────
+  countdown: {
+    id: 'countdown',
+    name: 'Countdown Timer',
+    sub: 'Live timer + Products rotate',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#0a1929"/><rect x="0" y="26" width="100" height="12" fill="#003" opacity="0.6"/><rect x="18" y="4" width="64" height="22" rx="5" fill="#0d47a1" opacity="0.8"/><text x="50" y="19" font-size="11" fill="white" text-anchor="middle" font-weight="bold">00:23:45</text><circle cx="80" cy="30" r="5" fill="#FFD700"/><circle cx="14" cy="22" r="8" fill="#e91e63" opacity="0.6"/></svg>`,
+    slots: [
+      { id:'logo',     label:'Logo',        icon:'🏢', req:true,  accept:'image/*', desc:'Brand logo (right side)' },
+      { id:'bg',       label:'Background',  icon:'🖼', req:true,  accept:'image/*', desc:'Full-width background' },
+      { id:'overline', label:'Overline',    icon:'📝', req:false, accept:'image/*', desc:'Tagline (bottom right)' },
+      { id:'cta',      label:'CTA Button',  icon:'👆', req:true,  accept:'image/*', desc:'Call-to-action (left, pulses)' },
+      { id:'product1', label:'Product 1',   icon:'📦', req:false, accept:'image/*', desc:'First product in carousel' },
+      { id:'product2', label:'Product 2',   icon:'📦', req:false, accept:'image/*', desc:'Second product' },
+      { id:'product3', label:'Product 3',   icon:'📦', req:false, accept:'image/*', desc:'Third product' },
+    ],
+    extraSettings: ['countdownDate'],
+
+    generateCSS() {
+      return `*{padding:0;margin:0;box-sizing:border-box;font-family:sans-serif}
+body{width:100%;height:150px;overflow:hidden;background:transparent}
+.bg{position:fixed;right:0;bottom:0;width:100%;height:130px;object-fit:cover;z-index:-100}
+.logo{position:fixed;right:4%;top:50%;transform:translateY(-50%);height:42px;object-fit:contain;z-index:10;cursor:pointer}
+.overline{position:fixed;right:4%;bottom:6px;height:18px;object-fit:contain}
+.cta{position:fixed;left:4%;bottom:8px;height:30px;animation:tapesh 1s infinite linear;cursor:pointer;object-fit:contain}
+.countdown{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:4px;background:rgba(0,0,0,0.55);border-radius:10px;padding:5px 12px;direction:ltr;backdrop-filter:blur(4px)}
+.cu{display:flex;flex-direction:column;align-items:center;min-width:26px}
+.cn{font-size:20px;font-weight:800;color:#fff;line-height:1;font-variant-numeric:tabular-nums}
+.cl{font-size:7px;color:#aaa;margin-top:1px}
+.cs{font-size:20px;color:#fff;font-weight:800;padding-bottom:10px}
+.product{position:fixed;left:35px;bottom:0;opacity:0;height:75px;object-fit:contain;cursor:pointer}
+.tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}`;
+    },
+
+    generateJS(s) {
+      const dt = s.cfg.countdownDate || new Date(Date.now() + 86400000 * 7).toISOString();
+      return `const TARGET=new Date('${dt}').getTime();
+function toP(n){return String(n).replace(/\\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
+function tick(){const now=Date.now(),diff=TARGET-now;const dn=document.querySelector('.day'),hn=document.querySelector('.hour'),mn=document.querySelector('.minute'),sn=document.querySelector('.second');if(diff<=0){[dn,hn,mn,sn].forEach(e=>{if(e)e.textContent='۰۰';});return;}const d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000),sec=Math.floor(diff%60000/1000);if(dn)dn.textContent=toP(d);if(hn)hn.textContent=toP(String(h).padStart(2,'0'));if(mn)mn.textContent=toP(String(m).padStart(2,'0'));if(sn)sn.textContent=toP(String(sec).padStart(2,'0'));}
+tick();setInterval(tick,1000);
+const products=document.querySelectorAll('.product');let counter=0;
+function nextProduct(){products.forEach(p=>gsap.to(p,{opacity:0,bottom:'0',duration:0.5}));if(products.length===0)return;const tags=[ALL_EVENT_TYPES.VISIT_SLIDE01,ALL_EVENT_TYPES.VISIT_SLIDE02,ALL_EVENT_TYPES.VISIT_SLIDE03];if(tags[counter])fire_tag(tags[counter]);gsap.to(products[counter],{opacity:1,bottom:'72px',duration:0.8,delay:0.4});counter=(counter+1)%products.length;}
+if(products.length>0){nextProduct();setInterval(nextProduct,5000);}
+const cta=document.querySelector('.cta');const logo=document.querySelector('.logo');
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES.CLICK3,ALL_EVENT_TYPES.CLICK4,ALL_EVENT_TYPES.CLICK5];if(t[i])fire_tag(t[i]);}));`;
+    },
+
+    generateBody(s, getA, mode) {
+      const show = (id, req) => req || !!s.assets[id] || mode === 'preview';
+      const lines = [];
+      if(show('bg',true))       lines.push(`  <img class="bg" src="${getA('bg')}"/>`);
+      if(show('logo',true))     lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('overline',false))lines.push(`  <img class="overline" src="${getA('overline')}"/>`);
+      if(show('cta',true))      lines.push(`  <img class="cta" src="${getA('cta')}"/>`);
+      lines.push(`  <div class="countdown">
+    <div class="cu"><span class="day cn">--</span><span class="cl">روز</span></div>
+    <span class="cs">:</span>
+    <div class="cu"><span class="hour cn">--</span><span class="cl">ساعت</span></div>
+    <span class="cs">:</span>
+    <div class="cu"><span class="minute cn">--</span><span class="cl">دقیقه</span></div>
+    <span class="cs">:</span>
+    <div class="cu"><span class="second cn">--</span><span class="cl">ثانیه</span></div>
+  </div>`);
+      ['product1','product2','product3'].forEach(id => {
+        if(show(id,false)) lines.push(`  <img class="product ${id}" src="${getA(id)}"/>`);
+      });
+      return lines.join('\n');
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // 4. TEXT SLIDE (Taline pattern)
+  //    Animated title + subtitle slide in/out, product left, CTA right
+  // ──────────────────────────────────────────────────────────────
+  textslide: {
+    id: 'textslide',
+    name: 'Text Slide',
+    sub: 'Animated title + subtitle + CTA',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#1a0a2e"/><rect x="0" y="24" width="55" height="14" rx="2" fill="#311" opacity="0.7"/><text x="62" y="12" font-size="8" fill="#ffe066" text-anchor="middle" font-weight="bold">عنوان کمپین</text><text x="62" y="22" font-size="5.5" fill="#aaa" text-anchor="middle">زیر عنوان تبلیغ</text><rect x="52" y="26" width="22" height="7" rx="3.5" fill="#FFD700"/><circle cx="16" cy="19" r="12" fill="#f0883e" opacity="0.2"/><circle cx="16" cy="19" r="8" fill="#f0883e" opacity="0.3"/></svg>`,
+    slots: [
+      { id:'logo',    label:'Logo',       icon:'🏢', req:true,  accept:'image/*', desc:'Brand logo (top right)' },
+      { id:'bg',      label:'Background', icon:'🖼', req:false, accept:'image/*', desc:'BG image (optional, overlaid by color)' },
+      { id:'product', label:'Product',    icon:'📦', req:false, accept:'image/*', desc:'Product image (left side, tall)' },
+    ],
+    extraSettings: ['text'],
+
+    generateCSS(s) {
+      const c = s.cfg;
+      return `:root{--bg:${c.bgColor||'#1a0a2e'};--title:${c.titleColor||'#ffffff'};--sub:${c.subtitleColor||'#ffe066'};--cta-bg:${c.ctaBg||'#FFD700'};--cta-txt:${c.ctaTextColor||'#000'}}
+*{padding:0;margin:0;box-sizing:border-box}
+body{width:100%;height:150px;overflow:hidden;background:transparent}
+.bg{position:fixed;bottom:0;left:0;width:100%;height:130px;object-fit:cover;z-index:-999}
+.glass{position:fixed;bottom:0;left:0;width:100%;height:130px;background:var(--bg);opacity:0.85;z-index:-998}
+.logo{position:fixed;right:4%;top:8px;height:36px;object-fit:contain;cursor:pointer;z-index:10}
+.product{position:fixed;left:0;bottom:0;height:135px;object-fit:contain}
+h1{position:fixed;right:4%;bottom:44%;font-size:20px;font-weight:900;color:var(--title);opacity:0;transform:translateX(2em);line-height:1.2}
+h2{position:fixed;right:4%;bottom:27%;font-size:13px;color:var(--sub);opacity:0;transform:translateX(2em);font-weight:600}
+.cta-btn{position:fixed;right:4%;bottom:8px;background:var(--cta-bg);color:var(--cta-txt);border:none;border-radius:100px;padding:6px 22px;font-size:13px;font-weight:700;cursor:pointer;animation:tapesh 0.75s infinite linear;font-family:inherit}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.15}}`;
+    },
+
+    generateJS(s) {
+      const c = s.cfg;
+      const title = c.title || 'عنوان کمپین';
+      const subtitle = c.subtitle || 'زیر عنوان';
+      return `document.addEventListener('DOMContentLoaded',()=>{
+const title=document.querySelector('h1');
+const sub=document.querySelector('h2');
+const logo=document.querySelector('.logo');
+const cta=document.querySelector('.cta-btn');
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+function animate(){
+  const tl=gsap.timeline();
+  tl.fromTo(title,{opacity:0,x:'2em'},{delay:0.5,duration:0.6,opacity:1,x:'0em'});
+  tl.fromTo(sub,{opacity:0,x:'2em'},{duration:0.5,opacity:1,x:'0em',onComplete:()=>{
+    setTimeout(()=>{
+      gsap.to(title,{opacity:0,x:'-2em',duration:0.4});
+      gsap.to(sub,{opacity:0,x:'-2em',duration:0.4,onComplete:animate});
+    },2800);
+  }});
+}
+animate();
+});`;
+    },
+
+    generateBody(s, getA, mode) {
+      const c = s.cfg;
+      const show = (id) => !!s.assets[id] || mode === 'preview';
+      const lines = [];
+      if(show('bg'))      lines.push(`  <img class="bg" src="${getA('bg')}"/>`);
+      lines.push(`  <div class="glass"></div>`);
+      if(show('logo'))    lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('product')) lines.push(`  <img class="product" src="${getA('product')}"/>`);
+      lines.push(`  <h1>${c.title||'عنوان کمپین'}</h1>`);
+      lines.push(`  <h2>${c.subtitle||'زیر عنوان'}</h2>`);
+      lines.push(`  <button class="cta-btn" onclick="fire_tag(ALL_EVENT_TYPES.CLICK1)">${c.ctaText||'خرید کنید'}</button>`);
+      return lines.join('\n');
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // 5. VIDEO BACKGROUND (Tapsi, Shahrefarsh, Tage, Snappmarket)
+  //    Video left (55%) · Logo + Overline + CTA right · Products float over video
+  // ──────────────────────────────────────────────────────────────
+  videobg: {
+    id: 'videobg',
+    name: 'Video Background',
+    sub: 'Video left · Products + CTA right',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#0a1520"/><rect x="0" y="0" width="54" height="38" fill="#111f30"/><polygon points="17,12 17,26 27,19" fill="#f0883e" opacity="0.9"/><rect x="56" y="4" width="40" height="12" rx="2" fill="#1a2d4a"/><circle cx="76" cy="10" r="5" fill="#FFD700" opacity="0.8"/><rect x="56" y="20" width="40" height="4" rx="2" fill="#f0883e" opacity="0.4"/><rect x="56" y="28" width="26" height="6" rx="3" fill="#f0883e" opacity="0.7"/></svg>`,
+    slots: [
+      { id:'logo',     label:'Logo',          icon:'🏢', req:true,  accept:'image/*',           desc:'Brand logo (top right, fixed)' },
+      { id:'video',    label:'Video (MP4)',    icon:'🎬', req:true,  accept:'video/mp4,video/*', desc:'Background video (autoplay muted)', isVideo:true },
+      { id:'unmute',   label:'Unmute Button', icon:'🔊', req:false, accept:'image/*',            desc:'Unmute icon (top-left of video)' },
+      { id:'overline', label:'Overline',      icon:'📝', req:false, accept:'image/*',            desc:'Tagline text image' },
+      { id:'cta',      label:'CTA Button',    icon:'👆', req:true,  accept:'image/*',            desc:'Call-to-action (pulses forever)' },
+      { id:'product1', label:'Product 1',     icon:'📦', req:true,  accept:'image/*',            desc:'First product (floats above video)' },
+      { id:'product2', label:'Product 2',     icon:'📦', req:false, accept:'image/*',            desc:'Second product' },
+      { id:'product3', label:'Product 3',     icon:'📦', req:false, accept:'image/*',            desc:'Third product' },
+    ],
+    extraSettings: ['interval'],
+
+    generateCSS() {
+      return `*{padding:0;margin:0;box-sizing:border-box}
+body{width:100%;height:150px;overflow:hidden;background:#0a1520;cursor:pointer}
+.video-wrap{position:fixed;left:0;bottom:0;width:55%;height:150px;overflow:hidden}
+video{width:100%;height:100%;object-fit:cover;display:block}
+.unmute{position:absolute;top:4px;left:4px;width:22px;height:22px;cursor:pointer;z-index:20;opacity:0.8;object-fit:contain}
+.unmute:hover{opacity:1}
+.logo{position:fixed;right:4%;top:10px;height:34px;object-fit:contain;cursor:pointer;z-index:10}
+.overline{position:fixed;right:4%;top:50px;height:16px;object-fit:contain}
+.cta{position:fixed;right:4%;bottom:12px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear}
+.product{position:fixed;left:27%;transform:translateX(-50%);bottom:-150px;opacity:0;height:110px;object-fit:contain;cursor:pointer}
+.tapesh{transform-origin:center;animation:tapesh 1s infinite linear}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}`;
+    },
+
+    generateJS(s) {
+      const ms = (s.cfg.interval || 5) * 1000;
+      return `const vid=document.querySelector('video');
+const unmuteBtn=document.querySelector('.unmute');
+const products=document.querySelectorAll('.product');
+let counter=0;
+const INTERVAL=${ms};
+if(unmuteBtn){unmuteBtn.addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();if(vid)vid.muted=!vid.muted;fire_tag(ALL_EVENT_TYPES.CLICK_AUTOPLAY);});}
+function fadeAll(){products.forEach(p=>{p.style.animation='none';gsap.to(p,{bottom:'-150px',opacity:0,duration:0.5});});}
+function showProduct(){
+  if(products.length===0)return;
+  fadeAll();
+  const tags=[ALL_EVENT_TYPES.VISIT_SLIDE01,ALL_EVENT_TYPES.VISIT_SLIDE02,ALL_EVENT_TYPES.VISIT_SLIDE03];
+  if(tags[counter])fire_tag(tags[counter]);
+  const p=products[counter];
+  gsap.to(p,{bottom:'20px',opacity:1,duration:0.8,onComplete:()=>{
+    p.style.animation='float 3s ease-in-out infinite';
+    counter=(counter+1)%products.length;
+  }});
+}
+showProduct();setInterval(showProduct,INTERVAL);
+const cta=document.querySelector('.cta');
+const logo=document.querySelector('.logo');
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES.CLICK3,ALL_EVENT_TYPES.CLICK4,ALL_EVENT_TYPES.CLICK5];if(t[i])fire_tag(t[i]);}));`;
+    },
+
+    generateBody(s, getA, mode) {
+      const show = (id, req) => req || !!s.assets[id] || mode === 'preview';
+      const videoAsset = s.assets['video'];
+      const lines = [];
+      lines.push(`  <div class="video-wrap">`);
+      if (mode === 'preview' && videoAsset) {
+        lines.push(`    <video loop autoplay playsinline muted><source src="${videoAsset.dataUrl}" type="video/mp4"/></video>`);
+      } else if (mode === 'preview') {
+        lines.push(`    <video loop autoplay playsinline muted style="background:#1a2a3a;width:100%;height:100%"></video>`);
+      } else {
+        lines.push(`    <video loop autoplay playsinline muted><source src="${getA('video')}" type="video/mp4"/></video>`);
+      }
+      if(show('unmute',false)) lines.push(`    <img class="unmute" src="${getA('unmute')}"/>`);
+      lines.push(`  </div>`);
+      if(show('logo',true))      lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('overline',false)) lines.push(`  <img class="overline" src="${getA('overline')}"/>`);
+      if(show('cta',true))       lines.push(`  <img class="cta" src="${getA('cta')}"/>`);
+      ['product1','product2','product3'].forEach(id => {
+        if(show(id, id==='product1')) lines.push(`  <img class="product ${id}" src="${getA(id)}"/>`);
+      });
+      return lines.join('\n');
+    }
+  },
+
+  // ──────────────────────────────────────────────────────────────
+  // 6. SCROLL REACTIVE (Okala, BackToSchool, Dookhtebartar, OKCS)
+  //    Products change as user scrolls the publisher page
+  //    Uses yn-window-scroll postMessage + invisible section.content
+  // ──────────────────────────────────────────────────────────────
+  scroll: {
+    id: 'scroll',
+    name: 'Scroll Reactive',
+    sub: 'Products change as user scrolls page',
+    svgPreview: `<svg viewBox="0 0 100 38" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="38" fill="#0d1f2d"/><rect x="2" y="2" width="96" height="34" rx="3" fill="none" stroke="#1a3a5c" stroke-width="1.5"/><rect x="5" y="5" width="60" height="6" rx="2" fill="#1a3a5c"/><rect x="5" y="14" width="45" height="4" rx="2" fill="#1a3a5c" opacity="0.6"/><rect x="5" y="21" width="52" height="4" rx="2" fill="#1a3a5c" opacity="0.5"/><rect x="5" y="28" width="38" height="4" rx="2" fill="#1a3a5c" opacity="0.4"/><circle cx="82" cy="14" r="10" fill="#f0883e" opacity="0.15" stroke="#f0883e" stroke-width="1"/><text x="82" y="18" font-size="9" fill="#f0883e" text-anchor="middle">↕</text><rect x="70" y="27" width="24" height="7" rx="3.5" fill="#FFD700" opacity="0.8"/></svg>`,
+    slots: [
+      { id:'logo',     label:'Logo',       icon:'🏢', req:true,  accept:'image/*', desc:'Brand logo (top right, always visible)' },
+      { id:'bg',       label:'Background', icon:'🖼', req:true,  accept:'image/*', desc:'Full ad background image' },
+      { id:'overline', label:'Overline',   icon:'📝', req:false, accept:'image/*', desc:'Tagline text image (above CTA)' },
+      { id:'cta',      label:'CTA Button', icon:'👆', req:true,  accept:'image/*', desc:'Call-to-action (always visible, pulses)' },
+      { id:'product1', label:'Product 1',  icon:'📦', req:true,  accept:'image/*', desc:'Shown at scroll 0% (top of page)' },
+      { id:'product2', label:'Product 2',  icon:'📦', req:false, accept:'image/*', desc:'Shown at scroll ~20%' },
+      { id:'product3', label:'Product 3',  icon:'📦', req:false, accept:'image/*', desc:'Shown at scroll ~40%' },
+      { id:'product4', label:'Product 4',  icon:'📦', req:false, accept:'image/*', desc:'Shown at scroll ~60%' },
+      { id:'product5', label:'Product 5',  icon:'📦', req:false, accept:'image/*', desc:'Shown at scroll ~80%' },
+      { id:'product6', label:'Product 6',  icon:'📦', req:false, accept:'image/*', desc:'Shown at scroll 100% (bottom)' },
+    ],
+    extraSettings: [],
+
+    generateCSS() {
+      return `*{padding:0;margin:0;box-sizing:border-box}
+body{width:100%;height:150px;overflow:hidden;background:transparent;cursor:pointer}
+.bg{position:fixed;bottom:0;left:0;width:100%;height:150px;object-fit:cover;z-index:-100}
+.logo{position:fixed;right:4%;top:8px;height:36px;object-fit:contain;z-index:10;cursor:pointer}
+.overline{position:fixed;right:4%;bottom:46px;height:18px;object-fit:contain}
+.cta{position:fixed;right:4%;bottom:8px;height:30px;object-fit:contain;cursor:pointer;animation:tapesh 1s infinite linear}
+.product{position:fixed;left:38%;transform:translateX(-50%);bottom:10px;height:118px;object-fit:contain;opacity:0;transition:opacity 0.45s ease,transform 0.45s ease;transform:translateX(-50%) scale(0.9);cursor:pointer}
+.product.active{opacity:1;transform:translateX(-50%) scale(1)}
+.content{position:fixed;top:0;right:0;width:1px;overflow:hidden;pointer-events:none;visibility:hidden}
+.item{height:100px}
+@keyframes tapesh{0%,100%{scale:1}50%{scale:1.2}}`;
+    },
+
+    generateJS(s) {
+      return `const products=Array.from(document.querySelectorAll('.product'));
+const contentEl=document.querySelector('.content');
+let currentSlide=0;
+const itemsCount=contentEl?Math.round(contentEl.scrollHeight/100):products.length||1;
+if(products.length>0)products[0].classList.add('active');
+function showSlide(n){
+  if(products.length===0)return;
+  n=((n%products.length)+products.length)%products.length;
+  if(n===currentSlide)return;
+  products[currentSlide].classList.remove('active');
+  currentSlide=n;
+  products[currentSlide].classList.add('active');
+  const tags=[ALL_EVENT_TYPES.VISIT_SLIDE01,ALL_EVENT_TYPES.VISIT_SLIDE02,ALL_EVENT_TYPES.VISIT_SLIDE03,ALL_EVENT_TYPES.VISIT_SLIDE04,ALL_EVENT_TYPES.VISIT_SLIDE05,ALL_EVENT_TYPES.VISIT_SLIDE06];
+  if(tags[n])fire_tag(tags[n]);
+}
+function handleScroll(percent,scrolledPx,heightOfPage){
+  const usePercent=heightOfPage<3500;
+  let n=usePercent?Math.round((percent/100)*(itemsCount-1)):Math.trunc(scrolledPx/700);
+  showSlide(n);
+}
+window.addEventListener('message',(e)=>{
+  if(!e.data||e.data.type!=='yn-window-scroll')return;
+  handleScroll(e.data.scrolled,e.data.scrolledInPx,e.data.heightOfPage);
+});
+const cta=document.querySelector('.cta');
+const logo=document.querySelector('.logo');
+if(cta)cta.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK1));
+if(logo)logo.addEventListener('click',()=>fire_tag(ALL_EVENT_TYPES.CLICK2));
+products.forEach((p,i)=>p.addEventListener('click',()=>{const t=[ALL_EVENT_TYPES.CLICK3,ALL_EVENT_TYPES.CLICK4,ALL_EVENT_TYPES.CLICK5,ALL_EVENT_TYPES.CLICK6];if(t[i])fire_tag(t[i]);}));`;
+    },
+
+    generateBody(s, getA, mode) {
+      const show = (id, req) => req || !!s.assets[id] || mode === 'preview';
+      const lines = [];
+      if(show('bg',true))       lines.push(`  <img class="bg" src="${getA('bg')}"/>`);
+      if(show('logo',true))     lines.push(`  <img class="logo" src="${getA('logo')}"/>`);
+      if(show('overline',false))lines.push(`  <img class="overline" src="${getA('overline')}"/>`);
+      if(show('cta',true))      lines.push(`  <img class="cta" src="${getA('cta')}"/>`);
+      ['product1','product2','product3','product4','product5','product6'].forEach(id => {
+        if(show(id, id==='product1')) lines.push(`  <img class="product ${id}" src="${getA(id)}"/>`);
+      });
+      lines.push(`  <section class="content">`);
+      for(let i=0;i<6;i++) lines.push(`    <div class="item"></div>`);
+      lines.push(`  </section>`);
+      return lines.join('\n');
+    }
+  },
+
+};
+
+// ================================================================
+// ASSET UTILITIES
+// ================================================================
+function assetSrc(slotId, mode) {
+  const a = S.assets[slotId];
+  if (mode === 'preview') {
+    return a ? a.dataUrl : ph(slotId);
+  } else {
+    if (a) return slotId + '.' + a.ext;
+    const tpl = TEMPLATES[S.tpl];
+    const slotDef = tpl ? tpl.slots.find(sl => sl.id === slotId) : null;
+    return slotId + (slotDef && slotDef.isVideo ? '.mp4' : '.png');
+  }
+}
+
+function assetFn(mode) {
+  return (id) => assetSrc(id, mode);
+}
+
+function handleUpload(slotId, file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    showToast('Upload an image (PNG, JPG, GIF, SVG) or video (MP4) file', 'err');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    S.assets[slotId] = { file, dataUrl: e.target.result, ext, name: file.name };
+    renderSlots();
+    renderFileTree();
+    schedulePreview();
+    showToast('✓ ' + slotId + ' loaded', 'ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearAsset(slotId) {
+  delete S.assets[slotId];
+  renderSlots();
+  renderFileTree();
+  schedulePreview();
+}
+
+// ================================================================
+// CODE GENERATION
+// ================================================================
+function generateCode(mode) {
+  const tpl = TEMPLATES[S.tpl];
+  const getA = assetFn(mode);
+  const css = tpl.generateCSS(S);
+  const js = tpl.generateJS(S, getA);
+  const body = tpl.generateBody(S, getA, mode);
+  const lang = S.cfg.langCode || 'fa';
+  const dir = S.cfg.langDir || 'rtl';
+  const title = (S.cfg.brandName || 'Campaign').replace(/[<>]/g, '');
+
+  if (mode === 'preview') {
+    return `<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="https://cdn.yektanet.com/assets/3rdparty/gsap@3.12.5/gsap.min.js"><\/script><title>${title}<\/title><style>${css}<\/style><script>${TAGS_JS}<\/script><\/head><body>\n${body}\n<script>${js}<\/script><script>${CLICK_SCRIPT}<\/script><\/body><\/html>`;
+  } else {
+    const html = `<!doctype html>
+<html lang="${lang}" dir="${dir}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.yektanet.com/assets/3rdparty/gsap@3.12.5/gsap.min.js"><\/script>
+  <title>${title}<\/title>
+  <link href="style.css" rel="stylesheet"/>
+  <script src="tags.js"><\/script>
+<\/head>
+<body>
+${body}
+  <script src="script.js"><\/script>
+  <script>${CLICK_SCRIPT}<\/script>
+<\/body>
+<\/html>`;
+    return { html, css, js };
+  }
+}
+
+// ================================================================
+// UI: TEMPLATE GRID
+// ================================================================
+function renderTemplates() {
+  const grid = document.getElementById('tplGrid');
+  grid.innerHTML = '';
+  Object.values(TEMPLATES).forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'tpl-card' + (S.tpl === t.id ? ' active' : '');
+    card.innerHTML = `<div class="tpl-icon">${t.svgPreview}</div><div class="tpl-name">${t.name}</div><div class="tpl-sub">${t.sub}</div>`;
+    card.onclick = () => {
+      S.tpl = t.id;
+      renderTemplates();
+      renderSlots();
+      renderSettings();
+      renderFileTree();
+      schedulePreview();
+    };
+    grid.appendChild(card);
+  });
+}
+
+// ================================================================
+// UI: ASSET SLOTS
+// ================================================================
+function renderSlots() {
+  const tpl = TEMPLATES[S.tpl];
+  const grid = document.getElementById('slotsGrid');
+  grid.innerHTML = '';
+
+  tpl.slots.forEach(slot => {
+    const asset = S.assets[slot.id];
+    const div = document.createElement('div');
+    div.className = 'slot' + (asset ? ' has-file' : '') + (slot.req && !asset ? ' req-miss' : '');
+
+    const isVideoAsset = asset && (slot.isVideo || asset.ext === 'mp4' || asset.ext === 'webm');
+    const thumb = asset
+      ? isVideoAsset
+        ? `<div class="slot-ph" title="${asset.name}">🎬</div>`
+        : `<img class="slot-thumb" src="${asset.dataUrl}"/>`
+      : `<div class="slot-ph">${slot.icon}</div>`;
+
+    const desc = asset
+      ? `<span class="slot-desc" title="${asset.name}">${asset.name}</span>`
+      : `<span class="slot-desc">${slot.desc || (slot.req ? '⚡ Required' : 'Optional')}</span>`;
+
+    const clearBtn = asset
+      ? `<button class="slot-clear" data-clear="${slot.id}" title="Remove">×</button>`
+      : '';
+
+    div.innerHTML = `${thumb}<div class="slot-info"><div class="slot-label">${slot.label}${slot.req ? '<span class="slot-star"> ★</span>' : ''}</div>${desc}</div>${clearBtn}`;
+
+    div.addEventListener('click', (e) => {
+      if (e.target.dataset.clear) return;
+      const inp = document.createElement('input');
+      inp.type = 'file';
+      inp.accept = slot.accept || 'image/*';
+      inp.onchange = e2 => { if(e2.target.files[0]) handleUpload(slot.id, e2.target.files[0]); };
+      inp.click();
+    });
+
+    div.addEventListener('dragover', e => { e.preventDefault(); div.classList.add('drag-over'); });
+    div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
+    div.addEventListener('drop', e => {
+      e.preventDefault();
+      div.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if(f) handleUpload(slot.id, f);
+    });
+
+    grid.appendChild(div);
+  });
+
+  grid.querySelectorAll('[data-clear]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); clearAsset(btn.dataset.clear); });
+  });
+}
+
+// ================================================================
+// UI: SETTINGS PANEL
+// ================================================================
+function renderSettings() {
+  const tpl = TEMPLATES[S.tpl];
+  const panel = document.getElementById('settingsPanel');
+  panel.innerHTML = '';
+
+  function addField(key, label, type, placeholder, extraAttrs) {
+    const div = document.createElement('div');
+    div.className = 'field';
+    const val = S.cfg[key] !== undefined ? S.cfg[key] : '';
+    div.innerHTML = `<label>${label}</label><input type="${type}" id="sf_${key}" value="${val}" placeholder="${placeholder||''}" ${extraAttrs||''}/>`;
+    panel.appendChild(div);
+    div.querySelector('input').addEventListener('input', e => {
+      S.cfg[key] = type === 'number' ? Number(e.target.value) : e.target.value;
+      if (type === 'color' || key.startsWith('bg') || key.includes('Color') || key.includes('color')) schedulePreview();
+      else if (key !== 'brandName' && key !== 'clickUrl') schedulePreview();
+    });
+  }
+
+  addField('brandName', 'Campaign / Brand Name', 'text', 'Elanza Black Friday');
+  addField('clickUrl',  'Click URL',              'url',  'https://brand.com/campaign');
+
+  // Language
+  const langDiv = document.createElement('div');
+  langDiv.className = 'field';
+  langDiv.innerHTML = `<label>Language & Direction</label>
+    <select id="sf_lang">
+      <option value="fa|rtl" ${S.cfg.langCode==='fa'?'selected':''}>🇮🇷 Persian (RTL)</option>
+      <option value="en|ltr" ${S.cfg.langCode==='en'?'selected':''}>🇬🇧 English (LTR)</option>
+      <option value="ar|rtl" ${S.cfg.langCode==='ar'?'selected':''}>🇸🇦 Arabic (RTL)</option>
+    </select>`;
+  panel.appendChild(langDiv);
+  langDiv.querySelector('select').addEventListener('change', e => {
+    const [code, dir] = e.target.value.split('|');
+    S.cfg.langCode = code;
+    S.cfg.langDir = dir;
+    schedulePreview();
+  });
+
+  if (tpl.extraSettings.includes('interval')) {
+    addField('interval', 'Carousel Interval (seconds)', 'number', '5');
+  }
+
+  if (tpl.extraSettings.includes('countdownDate')) {
+    addField('countdownDate', 'Countdown Target Date & Time', 'datetime-local', '');
+  }
+
+  if (tpl.extraSettings.includes('text')) {
+    addField('title',    'Title Text (h1)',        'text', 'عنوان کمپین');
+    addField('subtitle', 'Subtitle Text (h2)',     'text', 'زیر عنوان');
+    addField('ctaText',  'CTA Button Text',        'text', 'خرید کنید');
+
+    // Colors
+    const colorDiv = document.createElement('div');
+    colorDiv.innerHTML = '<div class="color-section-title">Colors</div>';
+    const colorsGrid = document.createElement('div');
+    colorsGrid.className = 'two-col';
+    const colorFields = [
+      ['bgColor',      'BG Overlay'],
+      ['titleColor',   'Title'],
+      ['subtitleColor','Subtitle'],
+      ['ctaBg',        'CTA Background'],
+      ['ctaTextColor', 'CTA Text'],
+    ];
+    colorFields.forEach(([key, lbl]) => {
+      const f = document.createElement('div');
+      f.className = 'field';
+      f.innerHTML = `<label>${lbl}</label><input type="color" id="sc_${key}" value="${S.cfg[key]||'#ffffff'}"/>`;
+      colorsGrid.appendChild(f);
+      f.querySelector('input').addEventListener('input', e => {
+        S.cfg[key] = e.target.value;
+        schedulePreview();
+      });
+    });
+    colorDiv.appendChild(colorsGrid);
+    panel.appendChild(colorDiv);
+  }
+}
+
+// ================================================================
+// UI: FILE TREE
+// ================================================================
+function renderFileTree() {
+  const tpl = TEMPLATES[S.tpl];
+  const tree = document.getElementById('fileTree');
+  const name = (S.cfg.brandName || 'campaign').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'') || 'campaign';
+
+  let html = `<div class="ft-folder">📁 ${name}/</div>`;
+  ['index.html','style.css','script.js','tags.js'].forEach(f => {
+    html += `<div class="ft-item gen">📄 ${f}</div>`;
+  });
+  tpl.slots.forEach(slot => {
+    const a = S.assets[slot.id];
+    const isVid = slot.isVideo || (a && (a.ext === 'mp4' || a.ext === 'webm'));
+    const defExt = slot.isVideo ? 'mp4' : 'png';
+    const fname = a ? `${slot.id}.${a.ext}` : `${slot.id}.${defExt}`;
+    const cls = a ? 'ok' : slot.req ? 'miss' : 'opt';
+    const icon = a ? (isVid ? '🎬' : '🖼') : slot.req ? '⚠' : '○';
+    html += `<div class="ft-item ${cls}">${icon} ${fname}</div>`;
+  });
+
+  tree.innerHTML = html;
+}
+
+// ================================================================
+// PREVIEW
+// ================================================================
+let previewTimer = null;
+let currentBlobUrl = null;
+
+function schedulePreview() {
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 600);
+}
+
+function updatePreview() {
+  try {
+    const html = generateCode('preview');
+    const frame = document.getElementById('adFrame');
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    frame.src = url;
+    if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+    currentBlobUrl = url;
+  } catch(err) {
+    console.error('Preview error:', err);
+  }
+}
+
+// ================================================================
+// EXPORT
+// ================================================================
+async function exportZip() {
+  const btn = document.getElementById('exportBtn');
+  const note = document.getElementById('exportNote');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating ZIP...';
+
+  try {
+    if (typeof JSZip === 'undefined') {
+      showToast('JSZip not loaded. Check your internet connection.', 'err');
+      return;
+    }
+
+    const tpl = TEMPLATES[S.tpl];
+    const name = (S.cfg.brandName || 'campaign')
+      .toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'campaign';
+
+    const { html, css, js } = generateCode('export');
+    const zip = new JSZip();
+    const folder = zip.folder(name);
+
+    folder.file('index.html', html);
+    folder.file('style.css', css);
+    folder.file('script.js', js);
+    folder.file('tags.js', TAGS_JS);
+
+    // Add uploaded assets
+    const uploads = tpl.slots.map(async slot => {
+      const a = S.assets[slot.id];
+      if (a && a.file) {
+        const buf = await a.file.arrayBuffer();
+        folder.file(`${slot.id}.${a.ext}`, buf);
+      }
+    });
+    await Promise.all(uploads);
+
+    // Also create a README
+    const missingRequired = tpl.slots.filter(sl => sl.req && !S.assets[sl.id]).map(sl => sl.id);
+    let readme = `# ${S.cfg.brandName || 'DB Campaign'}\n\nTemplate: ${tpl.name}\n\nGenerated by DB Creator · Uranus Agency\n\n## Files\n- index.html — main ad file\n- style.css — all styles\n- script.js — animations + tracking\n- tags.js — Yektanet event tracking\n\n## Assets\n`;
+    tpl.slots.forEach(sl => {
+      const a = S.assets[sl.id];
+      readme += `- ${sl.id}: ${a ? a.name + ' ✓' : sl.req ? '⚠ MISSING (required)' : '(not uploaded)'}\n`;
+    });
+    if (missingRequired.length > 0) {
+      readme += `\n⚠ Missing required assets: ${missingRequired.join(', ')}\nAdd these files to the folder before deploying.\n`;
+    }
+    readme += `\n## Click URL\nPass as URL parameter: index.html?click_url=https://your-url.com\n`;
+    folder.file('README.md', readme);
+
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name + '.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+
+    const uploadedCount = tpl.slots.filter(sl => S.assets[sl.id]).length;
+    showToast(`✅ Exported: ${name}.zip (${uploadedCount} assets)`, 'ok');
+    note.textContent = `Last export: ${name}.zip`;
+
+  } catch(err) {
+    console.error('Export error:', err);
+    showToast('Export failed: ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Export ZIP`;
+  }
+}
+
+// ================================================================
+// TOAST
+// ================================================================
+let toastTimer = null;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+function init() {
+  renderTemplates();
+  renderSlots();
+  renderSettings();
+  renderFileTree();
+  document.getElementById('exportBtn').addEventListener('click', exportZip);
+  schedulePreview();
+}
+
+init();
+</script>
+</body>
+</html>
