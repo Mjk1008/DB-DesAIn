@@ -331,6 +331,13 @@ const S = {
     subtitleColor: '#ffe066',
     ctaBg: '#FFD700',
     ctaTextColor: '#000000',
+    // Creative‑director motion controls (used by templates and downstream tooling)
+    impactLevel: 'balanced',   // subtle | balanced | high
+    motionCoverage: 65,        // percentage of DB area with visible motion
+    motionFocus: 'product',    // product | price | cta | background
+    entranceStyle: 'slide-up', // slide-up | zoom-in | fade | tilt-3d
+    loopDuration: 20,          // seconds before loop/reload
+    attentionHooks: [],        // ['colorFlashes','shakeCta','parallax','scrollReactive']
   }
 };
 
@@ -1101,6 +1108,116 @@ function renderSettings() {
     colorDiv.appendChild(colorsGrid);
     panel.appendChild(colorDiv);
   }
+
+  // Motion & impact — creative‑director controls applied consistently across templates
+  const motionGroup = document.createElement('div');
+  motionGroup.innerHTML = '<div class="color-section-title">Motion & Impact</div>';
+
+  // Impact level
+  const impactField = document.createElement('div');
+  impactField.className = 'field';
+  impactField.innerHTML = `<label>Impact level</label>
+    <select id="sf_impactLevel">
+      <option value="subtle" ${S.cfg.impactLevel==='subtle'?'selected':''}>Subtle</option>
+      <option value="balanced" ${!S.cfg.impactLevel || S.cfg.impactLevel==='balanced'?'selected':''}>Balanced (recommended)</option>
+      <option value="high" ${S.cfg.impactLevel==='high'?'selected':''}>High energy</option>
+    </select>`;
+  motionGroup.appendChild(impactField);
+  impactField.querySelector('select').addEventListener('change', e => {
+    S.cfg.impactLevel = e.target.value;
+    schedulePreview();
+  });
+
+  // Motion coverage slider
+  const coverageField = document.createElement('div');
+  coverageField.className = 'field';
+  const coverageVal = typeof S.cfg.motionCoverage === 'number' ? S.cfg.motionCoverage : 65;
+  coverageField.innerHTML = `<label>Motion coverage (% of DB with visible movement)</label>
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="range" id="sf_motionCoverage" min="30" max="90" value="${coverageVal}">
+      <span id="sf_motionCoverage_value" style="font-size:10px;color:#c9d1d9;min-width:32px;text-align:right">${coverageVal}%</span>
+    </div>`;
+  motionGroup.appendChild(coverageField);
+  const covInput = coverageField.querySelector('#sf_motionCoverage');
+  const covLabel = coverageField.querySelector('#sf_motionCoverage_value');
+  covInput.addEventListener('input', e => {
+    const v = Number(e.target.value);
+    S.cfg.motionCoverage = v;
+    covLabel.textContent = v + '%';
+    schedulePreview();
+  });
+
+  // Motion focus
+  const focusField = document.createElement('div');
+  focusField.className = 'field';
+  focusField.innerHTML = `<label>Primary motion focus</label>
+    <select id="sf_motionFocus">
+      <option value="product" ${!S.cfg.motionFocus || S.cfg.motionFocus==='product'?'selected':''}>Product (image / spin)</option>
+      <option value="price" ${S.cfg.motionFocus==='price'?'selected':''}>Price / offer badge</option>
+      <option value="cta" ${S.cfg.motionFocus==='cta'?'selected':''}>CTA button</option>
+      <option value="background" ${S.cfg.motionFocus==='background'?'selected':''}>Background / environment</option>
+    </select>`;
+  motionGroup.appendChild(focusField);
+  focusField.querySelector('select').addEventListener('change', e => {
+    S.cfg.motionFocus = e.target.value;
+    schedulePreview();
+  });
+
+  // Entrance style
+  const entranceField = document.createElement('div');
+  entranceField.className = 'field';
+  entranceField.innerHTML = `<label>Entrance style</label>
+    <select id="sf_entranceStyle">
+      <option value="slide-up" ${!S.cfg.entranceStyle || S.cfg.entranceStyle==='slide-up'?'selected':''}>Slide up (mobile bottom reveal)</option>
+      <option value="zoom-in" ${S.cfg.entranceStyle==='zoom-in'?'selected':''}>Zoom in</option>
+      <option value="fade" ${S.cfg.entranceStyle==='fade'?'selected':''}>Soft fade</option>
+      <option value="tilt-3d" ${S.cfg.entranceStyle==='tilt-3d'?'selected':''}>3D tilt / parallax</option>
+    </select>`;
+  motionGroup.appendChild(entranceField);
+  entranceField.querySelector('select').addEventListener('change', e => {
+    S.cfg.entranceStyle = e.target.value;
+    schedulePreview();
+  });
+
+  // Loop duration
+  const loopField = document.createElement('div');
+  loopField.className = 'field';
+  const loopVal = typeof S.cfg.loopDuration === 'number' && S.cfg.loopDuration > 0 ? S.cfg.loopDuration : 20;
+  loopField.innerHTML = `<label>Loop duration (seconds)</label>
+    <input type="number" id="sf_loopDuration" min="8" max="60" value="${loopVal}" />`;
+  motionGroup.appendChild(loopField);
+  loopField.querySelector('input').addEventListener('input', e => {
+    const v = Number(e.target.value) || 20;
+    S.cfg.loopDuration = Math.min(60, Math.max(8, v));
+    schedulePreview();
+  });
+
+  // Attention hooks
+  const hooksField = document.createElement('div');
+  hooksField.className = 'field';
+  hooksField.innerHTML = `<label>Attention hooks</label>
+    <div style="display:flex;flex-wrap:wrap;gap:6px 10px;font-size:10px;color:#c9d1d9">
+      <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" data-hook="colorFlashes" /> Color flashes on key beats</label>
+      <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" data-hook="shakeCta" /> CTA tapesh / shake emphasis</label>
+      <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" data-hook="parallax" /> Background parallax / depth</label>
+      <label style="display:flex;align-items:center;gap:4px"><input type="checkbox" data-hook="scrollReactive" /> Scroll-reactive motion</label>
+    </div>`;
+  motionGroup.appendChild(hooksField);
+
+  // Restore checkbox states
+  const activeHooks = Array.isArray(S.cfg.attentionHooks) ? new Set(S.cfg.attentionHooks) : new Set();
+  hooksField.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    const key = cb.dataset.hook;
+    cb.checked = activeHooks.has(key);
+    cb.addEventListener('change', () => {
+      const set = new Set(Array.isArray(S.cfg.attentionHooks) ? S.cfg.attentionHooks : []);
+      if (cb.checked) set.add(key); else set.delete(key);
+      S.cfg.attentionHooks = Array.from(set);
+      schedulePreview();
+    });
+  });
+
+  panel.appendChild(motionGroup);
 }
 
 // ================================================================
